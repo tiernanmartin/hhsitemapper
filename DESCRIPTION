@@ -12,9 +12,17 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Depends:
-    drake,
-    drakepkg
+    R (>= 3.1.0),
+    drake (>= 7.2)
 Imports:
-    purrr
+    purrr,
+    magrittr,
+    drakepkg,
+    osfr (>= 0.2.4),
+    dplyr,
+    readr,
+    sf,
+    tidycensus,
+    tigris
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 6.0.1
