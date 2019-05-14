@@ -1,2 +1,10 @@
-^hhsitemapper\.Rproj$
+^README\.Rmd$
+^LICENSE\.md$
+^drakepkg\.Rproj$
 ^\.Rproj\.user$
+^\.drake$
+^inst/extdata/*
+^extdata/*
+^R/scripts/*
+^R/archive/*
+tmp/*
