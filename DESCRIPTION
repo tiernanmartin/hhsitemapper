@@ -1,0 +1,18 @@
+Package: hhsitemapper
+Title: Create Home and Home Site Mapper Dataset
+Version: 0.0.0.9001
+Authors@R: 
+    person(given = "Tiernan",
+           family = "Martin",
+           role = c("aut", "cre"),
+           email = "tiernan.martin@gmail.com")
+Description: Creates the dataset that underlies the 
+  Home and Hope \href{https://www.enterprisecommunity.org/where-we-work/pacific-northwest/home-and-hope-mapping-tool}{Site Mapper webtool}.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends:
+    drake,
+    drakepkg
+Imports:
+    purrr
