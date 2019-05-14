@@ -1,3 +1,14 @@
 .Rproj.user
 .Rhistory
 .RData
+.Rhistory
+.RData
+.Rproj.user
+.drake
+/extdata/
+/intdata/
+/documents/
+tmp/*
+# the next two lines are designed to keep the `.gitignore` file
+inst/extdata/**/[a-z]*.*
+inst/extdata/**/[0-9]*.*
