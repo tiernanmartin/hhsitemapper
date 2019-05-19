@@ -13,11 +13,11 @@ Encoding: UTF-8
 LazyData: true
 Depends:
     R (>= 3.1.0),
-    drake (>= 7.2)
+    drake (>= 7.2),
+    drakepkg (>= 0.1),
 Imports:
     purrr,
-    magrittr,
-    drakepkg,
+    magrittr, 
     osfr (>= 0.2.4),
     dplyr,
     readr,
