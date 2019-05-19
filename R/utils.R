@@ -25,3 +25,24 @@ NULL
 #' @export
 #' @importFrom drakepkg make_with_beep
 NULL
+
+
+#' Parse a Lookup Table Character String
+#'
+#' @param string
+#' @param col_sep
+#' @param row_sep
+#' @param join_name
+#' @param long_name
+#' @keywords internal
+#' @return
+#' @export
+parse_lu_string <- function(string, col_sep, row_sep, join_name, long_name){
+  stringr::str_split(string, pattern = row_sep) %>%
+    purrr::flatten() %>%
+    purrr::keep(~ stringr::str_detect(.x,"")) %>%
+    stringr::str_replace_all("\\\n","") %>%
+    purrr::map_chr(c) %>%
+    purrr::map_df(~.x %>% stringr::str_split(pattern = col_sep) %>% as.data.frame %>% t %>% tibble::as_data_frame() ) %>%
+    purrr::set_names(c(join_name,long_name))
+}
