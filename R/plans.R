@@ -51,6 +51,8 @@ get_data_source_plan <- function(){
     other_exempt_owner_name_category_key_prep_status = target(command = prepare_other_exempt_owner_name_category_key(path = file_out("extdata/source/other_exempt_owner_name_category_key.rda")),
                                             trigger = trigger(mode = "blacklist", condition = FALSE)),
     owner_antijoin_names_prep_status = target(command = prepare_owner_antijoin_names(path = file_out("extdata/source/owner_antijoin_names.csv")),
+                                            trigger = trigger(mode = "blacklist", condition = FALSE)),
+    parcel_addr_prep_status = target(command = prepare_parcel_addr(path = file_out("extdata/source/parcel_addr.csv")),
                                             trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
@@ -103,6 +105,12 @@ get_data_source_plan <- function(){
                                                                    file_id =  "t7zpe",
                                                                    path = file_in("extdata/source/owner_antijoin_names.csv"),
                                                                    osf_dirpath = "data/raw-data"),
+                                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    parcel_addr_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                   project_id = "pvu6f",
+                                                                   file_id =  "x9zwq",
+                                                                   path = file_in("extdata/source/parcel_addr.csv"),
+                                                                   osf_dirpath = "data/raw-data/king-county-assessor-data"),
                                               trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
@@ -140,7 +148,13 @@ get_data_cache_plan <- function(){
     owner_antijoin_names_filepath = target(command = osf_download_file(osf_id = "t7zpe", path = file_out("extdata/osf/owner_antijoin_names.csv")),
                                          trigger = trigger(change = osf_get_file_version(osf_id = "t7zpe"))),
     pub_parcel_filepath = target(command = osf_download_file(osf_id = "5f7bd", path = file_out("extdata/osf/pub_parcel.csv")),
-                                         trigger = trigger(change = osf_get_file_version(osf_id = "5f7bd")))
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "5f7bd"))),
+    env_restrictions_filepath = target(command = osf_download_file(osf_id = "c54dv", path = file_out("extdata/osf/env_restrictions.csv")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "c54dv"))),
+    parcel_addr_filepath = target(command = osf_download_file(osf_id = "x9zwq", path = file_out("extdata/osf/parcel_addr.csv")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "x9zwq"))),
+    # add parcel_df,
+    # add parcel_sf_poly
   )
 
   ready_plan <- drake::drake_plan(
@@ -156,7 +170,11 @@ get_data_cache_plan <- function(){
     other_exempt_owner_name_category_key = make_other_exempt_owner_name_category_key(path = file_in("extdata/osf/other_exempt_owner_name_category_key.rda")),
     owner_antijoin_names = make_owner_antijoin_names(path = file_in("extdata/osf/owner_antijoin_names.csv")),
     pub_parcel = make_pub_parcel(path = file_in("extdata/osf/pub_parcel.csv")),
-    acct = make_acct(path = file_in("extdata/source/Real_Property_Account_Extract_2010515.csv"))
+    acct = make_acct(path = file_in("extdata/source/Real_Property_Account_Extract_2010515.csv")),
+    env_restrictions = make_env_restrictions(path = file_in("extdata/osf/env_restrictions.csv")),
+    parcel_addr = make_parcel_addr(path = file_in("extdata/osf/parcel_addr.csv")),
+    parcel_df = make_parcel_df(path = file_in("extdata/osf/EXTR_Parcel.csv")),
+    parcel_sf_poly = make_parcel_sf_poly(path = file_in("extdata/osf/parcel_sf_poly.gpkg"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)
