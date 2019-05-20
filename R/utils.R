@@ -77,4 +77,5 @@ gs_read_all <- function(ss, delay_length = 5){
   return(worksheets)
 }
 
-
+#' @keywords internal
+not_sfc <- function(x) !any(class(x) %in% 'sfc')
