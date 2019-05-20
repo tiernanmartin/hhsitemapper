@@ -45,6 +45,12 @@ get_data_source_plan <- function(){
     present_use_recode_prep_status = target(command = prepare_present_use_recode(path = file_out("extdata/source/present_use_recode.csv")),
                                             trigger = trigger(mode = "blacklist", condition = FALSE)),
     name_recode_key_prep_status = target(command = prepare_name_recode_key(path = file_out("extdata/source/name_recode_key.rda")),
+                                            trigger = trigger(mode = "blacklist", condition = FALSE)),
+    public_owner_name_category_key_prep_status = target(command = prepare_public_owner_name_category_key(path = file_out("extdata/source/public_owner_name_category_key.rda")),
+                                            trigger = trigger(mode = "blacklist", condition = FALSE)),
+    other_exempt_owner_name_category_key_prep_status = target(command = prepare_other_exempt_owner_name_category_key(path = file_out("extdata/source/other_exempt_owner_name_category_key.rda")),
+                                            trigger = trigger(mode = "blacklist", condition = FALSE)),
+    owner_antijoin_names_prep_status = target(command = prepare_owner_antijoin_names(path = file_out("extdata/source/owner_antijoin_names.csv")),
                                             trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
@@ -79,6 +85,24 @@ get_data_source_plan <- function(){
                                                                    file_id = "4azv5",
                                                                    path = file_in("extdata/source/name_recode_key.rda"),
                                                                    osf_dirpath = "data/raw-data"),
+                                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    public_owner_name_category_key_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                   project_id = "pvu6f",
+                                                                   file_id = "8az7h",
+                                                                   path = file_in("extdata/source/public_owner_name_category_key.rda"),
+                                                                   osf_dirpath = "data/raw-data"),
+                                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    other_exempt_owner_name_category_key_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                   project_id = "pvu6f",
+                                                                   file_id = "frbxu",
+                                                                   path = file_in("extdata/source/other_exempt_owner_name_category_key.rda"),
+                                                                   osf_dirpath = "data/raw-data"),
+                                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    owner_antijoin_names_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                   project_id = "pvu6f",
+                                                                   file_id =  "t7zpe",
+                                                                   path = file_in("extdata/source/owner_antijoin_names.csv"),
+                                                                   osf_dirpath = "data/raw-data"),
                                               trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
@@ -108,7 +132,15 @@ get_data_cache_plan <- function(){
     present_use_recode_filepath = target(command = osf_download_file(osf_id = "4rjk6", path = file_out("extdata/osf/present_use_recode.csv")),
                                          trigger = trigger(change = osf_get_file_version(osf_id = "4rjk6"))),
     name_recode_key_filepath = target(command = osf_download_file(osf_id = "4azv5", path = file_out("extdata/osf/name_recode_key.rda")),
-                                         trigger = trigger(change = osf_get_file_version(osf_id = "4azv5")))
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "4azv5"))),
+    public_owner_name_category_key_filepath = target(command = osf_download_file(osf_id = "8az7h", path = file_out("extdata/osf/public_owner_name_category_key.rda")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "8az7h"))),
+    other_exempt_owner_name_category_key_filepath = target(command = osf_download_file(osf_id = "frbxu", path = file_out("extdata/osf/other_exempt_owner_name_category_key.rda")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "frbxu"))),
+    owner_antijoin_names_filepath = target(command = osf_download_file(osf_id = "t7zpe", path = file_out("extdata/osf/owner_antijoin_names.csv")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "t7zpe"))),
+    pub_parcel_filepath = target(command = osf_download_file(osf_id = "5f7bd", path = file_out("extdata/osf/pub_parcel.csv")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "5f7bd")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -119,7 +151,12 @@ get_data_cache_plan <- function(){
     prop_type = make_prop_type(path = file_in("extdata/osf/prop_type.txt")),
     present_use_recode = make_present_use_recode(path = file_in("extdata/osf/present_use_recode.csv")),
     parcel_lookup = make_parcel_lookup(parcel_metadata_table, lookup, present_use_recode),
-    name_recode_key = make_name_recode_key(path = file_in("extdata/osf/name_recode_key.rda"))
+    name_recode_key = make_name_recode_key(path = file_in("extdata/osf/name_recode_key.rda")),
+    public_owner_name_category_key = make_public_owner_name_category_key(path = file_in("extdata/osf/public_owner_name_category_key.rda")),
+    other_exempt_owner_name_category_key = make_other_exempt_owner_name_category_key(path = file_in("extdata/osf/other_exempt_owner_name_category_key.rda")),
+    owner_antijoin_names = make_owner_antijoin_names(path = file_in("extdata/osf/owner_antijoin_names.csv")),
+    pub_parcel = make_pub_parcel(path = file_in("extdata/osf/pub_parcel.csv")),
+    acct = make_acct(path = file_in("extdata/source/Real_Property_Account_Extract_2010515.csv"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)
