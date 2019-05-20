@@ -172,9 +172,12 @@ get_data_cache_plan <- function(){
     pub_parcel = make_pub_parcel(path = file_in("extdata/osf/pub_parcel.csv")),
     acct = make_acct(path = file_in("extdata/source/Real_Property_Account_Extract_2010515.csv")),
     env_restrictions = make_env_restrictions(path = file_in("extdata/osf/env_restrictions.csv")),
-    parcel_addr = make_parcel_addr(path = file_in("extdata/osf/parcel_addr.csv")),
+    parcel_addr_ready = make_parcel_addr_ready(path = file_in("extdata/osf/parcel_addr.csv")),
     parcel_df = make_parcel_df(path = file_in("extdata/osf/EXTR_Parcel.csv")),
-    parcel_sf_poly = make_parcel_sf_poly(path = file_in("extdata/osf/parcel_sf_poly.gpkg"))
+    parcel_sf_poly = make_parcel_sf_poly(path = file_in("extdata/osf/parcel_sf_poly.gpkg")),
+    parcel_sf = make_parcel_sf(parcel_sf_poly),
+    parcel_sf_ready = make_parcel_sf_ready(parcel_sf),
+    parcel_df_ready =  make_parcel_df_ready(parcel_lookup, prop_type, pub_parcel, parcel_df)
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)

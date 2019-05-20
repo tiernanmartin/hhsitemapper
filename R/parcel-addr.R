@@ -38,7 +38,7 @@ prepare_parcel_addr <- function(path){
 
 #' @rdname parcel_addr
 #' @export
-make_parcel_addr <- function(path){
+make_parcel_addr_ready <- function(path){
 
   parcel_addr_raw <- readr::read_csv(path)
 
@@ -68,7 +68,5 @@ make_parcel_addr <- function(path){
     dplyr::slice(1) %>%
     dplyr::ungroup()
 
-  parcel_addr <- parcel_addr_ready
-
-  return(parcel_addr)
+  return(parcel_addr_ready)
 }
