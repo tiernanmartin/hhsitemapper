@@ -12,3 +12,4 @@ tmp/*
 # the next two lines are designed to keep the `.gitignore` file
 inst/extdata/**/[a-z]*.*
 inst/extdata/**/[0-9]*.*
+.httr-oauth

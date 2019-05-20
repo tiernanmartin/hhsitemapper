@@ -8,3 +8,4 @@
 ^R/scripts/*
 ^R/archive/*
 tmp/*
+^\.httr-oauth$
