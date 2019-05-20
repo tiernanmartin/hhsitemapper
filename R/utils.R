@@ -26,6 +26,9 @@ NULL
 #' @importFrom drakepkg make_with_beep
 NULL
 
+#' @rdname make_with_beep
+#'@keywords internal
+mb <- drakepkg::make_with_beep
 
 #' Parse a Lookup Table Character String
 #'
@@ -73,3 +76,5 @@ gs_read_all <- function(ss, delay_length = 5){
 
   return(worksheets)
 }
+
+
