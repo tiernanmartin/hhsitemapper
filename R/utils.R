@@ -46,3 +46,30 @@ parse_lu_string <- function(string, col_sep, row_sep, join_name, long_name){
     purrr::map_df(~.x %>% stringr::str_split(pattern = col_sep) %>% as.data.frame %>% t %>% tibble::as_data_frame() ) %>%
     purrr::set_names(c(join_name,long_name))
 }
+
+#' @keywords internal
+g <- function(x){dplyr::glimpse(x)}
+
+#' Google Sheets Read-all
+#'
+#' @param ss
+#' @param delay_length
+#' @keywords internal
+#' @return
+#' @export
+gs_read_all <- function(ss, delay_length = 5){
+  ws_names <- googlesheets::gs_ws_ls(ss)
+
+
+  gs_read_delayed <- function(ss, ws){
+    result <- googlesheets::gs_read(ss, ws)
+    Sys.sleep(delay_length)
+    return(result)
+  }
+
+  worksheets <- map(ws_names, ~ gs_read_delayed(ss, ws = .x)) %>%
+    set_names(ws_names)
+
+
+  return(worksheets)
+}

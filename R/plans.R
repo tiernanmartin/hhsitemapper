@@ -43,6 +43,8 @@ get_data_source_plan <- function(){
     prop_type_prep_status = target(command = prepare_prop_type(path = file_out("extdata/source/prop_type.txt")),
                                    trigger = trigger(mode = "blacklist", condition = FALSE)),
     present_use_recode_prep_status = target(command = prepare_present_use_recode(path = file_out("extdata/source/present_use_recode.csv")),
+                                            trigger = trigger(mode = "blacklist", condition = FALSE)),
+    name_recode_key_prep_status = target(command = prepare_name_recode_key(path = file_out("extdata/source/name_recode_key.rda")),
                                             trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
@@ -71,6 +73,12 @@ get_data_source_plan <- function(){
                                                                    file_id = "4rjk6",
                                                                    path = file_in("extdata/source/present_use_recode.csv"),
                                                                    osf_dirpath = "data/raw-data"),
+                                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    name_recode_key_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                   project_id = "pvu6f",
+                                                                   file_id = "4azv5",
+                                                                   path = file_in("extdata/source/name_recode_key.rda"),
+                                                                   osf_dirpath = "data/raw-data"),
                                               trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
@@ -98,7 +106,9 @@ get_data_cache_plan <- function(){
     prop_type_filepath = target(command = osf_download_file(osf_id = "26r89", path = file_out("extdata/osf/prop_type.txt")),
                                 trigger = trigger(change = osf_get_file_version(osf_id = "26r89"))),
     present_use_recode_filepath = target(command = osf_download_file(osf_id = "4rjk6", path = file_out("extdata/osf/present_use_recode.csv")),
-                                         trigger = trigger(change = osf_get_file_version(osf_id = "4rjk6")))
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "4rjk6"))),
+    name_recode_key_filepath = target(command = osf_download_file(osf_id = "4azv5", path = file_out("extdata/osf/name_recode_key.rda")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "4azv5")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -107,7 +117,9 @@ get_data_cache_plan <- function(){
     tax_reason = make_tax_reason(path = file_in("extdata/osf/tax_reason.txt")),
     parcel_metadata_table = make_parcel_metadata_table(path = file_in("extdata/osf/KC_Parcel_Metadata_Table.csv")),
     prop_type = make_prop_type(path = file_in("extdata/osf/prop_type.txt")),
-    present_use_recode = make_present_use_recode(path = file_in("extdata/osf/present_use_recode.csv"))
+    present_use_recode = make_present_use_recode(path = file_in("extdata/osf/present_use_recode.csv")),
+    parcel_lookup = make_parcel_lookup(parcel_metadata_table, lookup, present_use_recode),
+    name_recode_key = make_name_recode_key(path = file_in("extdata/osf/name_recode_key.rda"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)

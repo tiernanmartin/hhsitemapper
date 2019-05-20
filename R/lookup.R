@@ -6,7 +6,8 @@
 #' @export
 make_lookup <- function(path){
 
-  lookup <- readr::read_csv(path, col_types = "ddc")
+  lookup <- readr::read_csv(path, col_types = "ccc") %>%
+    janitor::clean_names("screaming_snake")
 
   return(lookup)
 }
