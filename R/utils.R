@@ -79,3 +79,61 @@ gs_read_all <- function(ss, delay_length = 5){
 
 #' @keywords internal
 not_sfc <- function(x) !any(class(x) %in% 'sfc')
+
+#' @keywords internal
+make_pin <- function( major, minor){
+  res <- stringr::str_c(stringr::str_pad(string = major, width = 6,side = "left",pad = "0"),
+                        stringr::str_pad(string = minor, width = 4,side = "left",pad = "0"))
+  return(res)
+}
+
+#' @keywords internal
+subset_duplicated <- function(x,nm,notin = FALSE){
+        if(notin){
+                subset(x, (! x[[nm]] %in% x[[nm]][duplicated(x[[nm]])]))
+        }else{
+                subset(x, x[[nm]] %in% x[[nm]][duplicated(x[[nm]])])
+        }
+}
+
+
+# FUNCTIONS: LOGICAL RECODING ----
+
+#' @keywords internal
+is_logical_yn <- function(x){all(unique(x) %in% c("Y","N",NA_character_))}
+
+#' @keywords internal
+recode_logical_yn <- function(x){ dplyr::if_else(x %in% "Y",TRUE,FALSE,missing = NA)}
+
+#' @keywords internal
+is_logical_01 <- function(x){all(unique(x) %in% c(1,0, NA))}
+
+#' @keywords internal
+recode_logical_01 <- function(x){ dplyr::if_else(x %in% 1,TRUE,FALSE,missing = NA)}
+
+#' @keywords internal
+is_logical_yesno <- function(x){
+
+  strings <- list("yes", "no") %>%
+    purrr::map(~ list(snakecase::to_screaming_snake_case,snakecase::to_snake_case,snakecase::to_upper_camel_case) %>%
+          purrr::invoke_map_chr(.x)
+    ) %>% purrr::flatten_chr() %>%
+    purrr::prepend(NA_character_)
+
+  all(unique(x) %in% strings)
+
+}
+
+#' @keywords internal
+recode_logical_yesno <- function(x){
+
+  yes <- purrr::map("yes",~ list(snakecase::to_screaming_snake_case,snakecase::to_snake_case,snakecase::to_upper_camel_case) %>%
+               purrr::invoke_map_chr(.x)
+  ) %>% purrr::flatten_chr()
+
+  dplyr::if_else(x %in% yes,TRUE,FALSE,missing = NA)
+
+}
+
+#' @keywords internal
+str_clean_upper <- function(x){stringr::str_to_upper(stringr::str_trim(stringr::str_squish(stringr::str_replace_all(x,"^[:punct:]]",""))))}
