@@ -2,7 +2,12 @@
 % Please edit documentation in R/utils.R
 \name{make_with_beep}
 \alias{make_with_beep}
+\alias{mb}
 \title{Make With Beep}
+\usage{
+mb(plan, envir, .beep = TRUE, .beep_on_error = TRUE, ...)
+}
 \description{
 See \code{drakepkg::\link[drakepkg:make_with_beep]{make_with_beep}} for details.
 }
+\keyword{internal}
