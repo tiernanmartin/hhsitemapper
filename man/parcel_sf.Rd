@@ -23,7 +23,7 @@ make_parcel_sf_ready(parcel_sf)
 \item{parcel_sf}{desc}
 }
 \value{
-a character string
+Returns an \code{\link[sf:sf]{sf object}}.
 
 a character string
 

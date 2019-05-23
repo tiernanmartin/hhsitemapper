@@ -2,13 +2,23 @@
 % Please edit documentation in R/env-restrictions.R
 \name{make_env_restrictions}
 \alias{make_env_restrictions}
+\alias{make_parcel_env_ready}
 \title{Parcel Environmental Restrictions}
 \usage{
 make_env_restrictions(path)
+
+make_parcel_env_ready(env_restrictions)
+}
+\arguments{
+\item{env_restrictions}{desc}
 }
 \description{
 Environmental restrictions of parcels in King County.
+
+Environmental restrictions of parcels in King County.
 }
 \note{
+Data source: King County Assessor Data Portal
+
 Data source: King County Assessor Data Portal
 }

@@ -2,13 +2,27 @@
 % Please edit documentation in R/acct.R
 \name{make_acct}
 \alias{make_acct}
+\alias{make_parcel_acct_ready}
 \title{Real Property Account Extract}
 \usage{
 make_acct(path)
+
+make_parcel_acct_ready(acct, tax_status, tax_reason)
+}
+\arguments{
+\item{acct}{desc}
+
+\item{tax_status}{desc}
+
+\item{tax_reason}{desc}
 }
 \description{
 Account information for owners of parcels in King County.
+
+Account information for owners of parcels in King County.
 }
 \note{
+Data source: King County Assessor's Office (restricted access)
+
 Data source: King County Assessor's Office (restricted access)
 }

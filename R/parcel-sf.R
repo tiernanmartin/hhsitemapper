@@ -1,7 +1,7 @@
 #' @title Parcel Boundary
 #' @description Desc
 #' @param path desc
-#' @return a character string
+#' @return Returns an \code{\link[sf:sf]{sf object}}.
 #' @note Source: King County GIS (\url{ftp://ftp.kingcounty.gov/gis-web/GISData/parcel_SHP.zip})
 #' @rdname parcel_sf
 #' @export
