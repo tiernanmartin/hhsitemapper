@@ -32,7 +32,7 @@ prepare_zcta <- function(path){
 #' @export
 make_zcta <- function(path, king_county){
 
-  ztca_wa <- sf::st_read(path) %>%
+  ztca_wa <- sf::read_sf(path) %>%
     sf::st_transform(2926)
 
   buff_dist <- 5280*2 # 2 miles in ft

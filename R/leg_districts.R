@@ -32,7 +32,7 @@ make_leg_districts <- function(path){
 
   unzip(zipfile = path, exdir = dirname(path))
 
-  leg_districts <- sf::st_read("extdata/osf/legdst/legdst.shp") %>%
+  leg_districts <- sf::read_sf("extdata/osf/legdst/legdst.shp") %>%
     dplyr::rename_if(not_sfc,snakecase::to_screaming_snake_case) %>%
     sf::st_as_sf() %>%
     sf::st_transform(2926)

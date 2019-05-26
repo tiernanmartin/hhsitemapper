@@ -32,7 +32,7 @@ make_kc_city <- function(path){
 
   unzip(zipfile = path, exdir = dirname(path))
 
-  kc_city_kc <- sf::st_read("extdata/osf/city_kc/city_kc.shp") %>%
+  kc_city_kc <- sf::read_sf("extdata/osf/city_kc/city_kc.shp") %>%
     dplyr::rename_if(not_sfc,snakecase::to_screaming_snake_case) %>%
     sf::st_as_sf() %>%
     sf::st_transform(2926)

@@ -28,7 +28,7 @@ make_wa_major_waterbodies <- function(path){
 
   unzip(zipfile = path, exdir = dirname(path))
 
-  wtr <- sf::st_read("extdata/osf/NHDMajor.gdb", layer = "NHD_MajorWaterbodies") %>%
+  wtr <- sf::read_sf("extdata/osf/NHDMajor.gdb", layer = "NHD_MajorWaterbodies") %>%
     sf::st_transform(2926)
 
   wa_major_waterbodies <- wtr

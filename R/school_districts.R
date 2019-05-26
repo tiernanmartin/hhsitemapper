@@ -32,7 +32,7 @@ make_school_districts <- function(path){
 
   unzip(zipfile = path, exdir = dirname(path))
 
-  school_districts <- sf::st_read("extdata/osf/schdst/schdst.shp") %>%
+  school_districts <- sf::read_sf("extdata/osf/schdst/schdst.shp") %>%
     dplyr::rename_if(not_sfc,snakecase::to_screaming_snake_case) %>%
     sf::st_as_sf() %>%
     sf::st_transform(2926)

@@ -30,7 +30,7 @@ prepare_king_county <- function(path){
 #' @export
 make_king_county <- function(path){
 
-  king_county <- sf::st_read(path) %>%
+  king_county <- sf::read_sf(path) %>%
     dplyr::rename_if(not_sfc, snakecase::to_screaming_snake_case) %>%
     sf::st_as_sf() %>%
     sf::st_transform(2926)

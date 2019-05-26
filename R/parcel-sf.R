@@ -17,7 +17,7 @@ prepare_parcel_sf_poly <- function(path){
 
    unzip(path_zip, exdir = dirname(path_zip))
 
-   parcel_sf_poly_raw <- sf::st_read(dsn = "extdata/source/parcel/parcel.shp") %>%
+   parcel_sf_poly_raw <- sf::read_sf(dsn = "extdata/source/parcel/parcel.shp") %>%
      dplyr::rename_if(not_sfc, snakecase::to_screaming_snake_case)
 
 
@@ -39,7 +39,7 @@ prepare_parcel_sf_poly <- function(path){
 #' @export
 make_parcel_sf_poly <- function(path){
 
-  parcel_sf_poly <- sf::st_read(path)
+  parcel_sf_poly <- sf::read_sf(path)
 
   return(parcel_sf_poly)
 }

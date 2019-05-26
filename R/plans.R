@@ -74,6 +74,16 @@ get_data_source_plan <- function(){
     school_districts_prep_status = target(command = prepare_school_districts(path = file_out("extdata/source/schdst_SHP.zip")),
                                      trigger = trigger(mode = "blacklist", condition = FALSE)),
     leg_districts_prep_status = target(command = prepare_leg_districts(path = file_out("extdata/source/legdst_SHP.zip")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    kc_council_districts_prep_status = target(command = prepare_kc_council_districts(path = file_out("extdata/source/kccdst_SHP.zip")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    seattle_council_districts_prep_status = target(command = prepare_seattle_council_districts(path = file_out("extdata/source/sccdst_SHP.zip")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    bus_stops_metro_prep_status = target(command = prepare_bus_stops_metro(path = file_out("extdata/source/transitstop_SHP.zip")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    transit_stops_osm_prep_status = target(command = prepare_transit_stops_osm(path = file_out("extdata/source/transit_stops_osm.gpkg")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    play_spaces_osm_prep_status = target(command = prepare_play_spaces_osm(path = file_out("extdata/source/play_spaces_osm.gpkg")),
                                      trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
@@ -192,6 +202,36 @@ get_data_source_plan <- function(){
                                                             file_id =  "v4xk7",
                                                             path = file_in("extdata/source/legdst_SHP.zip"),
                                                             osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    kc_council_districts_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "82c7m",
+                                                            path = file_in("extdata/source/kccdst_SHP.zip"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    seattle_council_districts_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "cj27h",
+                                                            path = file_in("extdata/source/sccdst_SHP.zip"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    bus_stops_metro_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "w9ap3",
+                                                            path = file_in("extdata/source/transitstop_SHP.zip"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    transit_stops_osm_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "zk826",
+                                                            path = file_in("extdata/source/transit_stops_osm.gpkg"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    play_spaces_osm_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "4prez",
+                                                            path = file_in("extdata/source/play_spaces_osm.gpkg"),
+                                                            osf_dirpath = "data/raw-data/"),
                                        trigger = trigger(mode = "blacklist", condition = FALSE))
 
   )
@@ -256,7 +296,17 @@ get_data_cache_plan <- function(){
     school_districts_filepath = target(command = osf_download_file(osf_id = "8svty", path = file_out("extdata/osf/schdst_SHP.zip")),
                                   trigger = trigger(change = osf_get_file_version(osf_id = "8svty"))),
     leg_districts_filepath = target(command = osf_download_file(osf_id = "v4xk7", path = file_out("extdata/osf/legdst_SHP.zip")),
-                                  trigger = trigger(change = osf_get_file_version(osf_id = "v4xk7")))
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "v4xk7"))),
+    kc_council_districts_filepath = target(command = osf_download_file(osf_id = "82c7m", path = file_out("extdata/osf/kccdst_SHP.zip")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "82c7m"))),
+    seattle_council_districts_filepath = target(command = osf_download_file(osf_id = "cj27h", path = file_out("extdata/osf/sccdst_SHP.zip")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "cj27h"))),
+    bus_stops_metro_filepath = target(command = osf_download_file(osf_id = "w9ap3", path = file_out("extdata/osf/transitstop_SHP.zip")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "w9ap3"))),
+    transit_stops_osm_filepath = target(command = osf_download_file(osf_id = "zk826", path = file_out("extdata/osf/transit_stops_osm.gpkg")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "zk826"))),
+    play_spaces_osm_filepath = target(command = osf_download_file(osf_id = "4prez", path = file_out("extdata/osf/play_spaces_osm.gpkg")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "4prez")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -293,7 +343,12 @@ get_data_cache_plan <- function(){
     zcta = make_zcta(path = file_in("extdata/osf/zcta.gpkg"), king_county),
     census_place = make_census_place(path = file_in("extdata/osf/census_place.gpkg")),
     school_districts = make_school_districts(path = file_in("extdata/osf/schdst_SHP.zip")),
-    leg_districts = make_leg_districts(path = file_in("extdata/osf/legdst_SHP.zip"))
+    leg_districts = make_leg_districts(path = file_in("extdata/osf/legdst_SHP.zip")),
+    kc_council_districts = make_kc_council_districts(path = file_in("extdata/osf/kccdst_SHP.zip")),
+    seattle_council_districts = make_seattle_council_districts(path = file_in("extdata/osf/sccdst_SHP.zip")),
+    bus_stops_metro = make_bus_stops_metro(path = file_in("extdata/osf/transitstop_SHP.zip")),
+    transit_stops_osm = make_transit_stops_osm(path = file_in("extdata/osf/transit_stops_osm.gpkg")),
+    play_spaces_osm = make_play_spaces_osm(path = file_in("extdata/osf/play_spaces_osm.gpkg"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)

@@ -36,7 +36,7 @@ prepare_census_tracts <- function(path){
 #' @export
 make_census_tracts <- function(path){
 
-  census_tracts_kc <- sf::st_read(path) %>%
+  census_tracts_kc <- sf::read_sf(path) %>%
     sf::st_transform(2926)
 
   census_tracts <- census_tracts_kc

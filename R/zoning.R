@@ -33,7 +33,7 @@ make_zoning <- function(path){
 
   unzip(zipfile = path, exdir = dirname(path))
 
-  zoning_kc <- sf::st_read("extdata/osf/zoning_kc_consol_20/zoning_kc_consol_20.shp") %>%
+  zoning_kc <- sf::read_sf("extdata/osf/zoning_kc_consol_20/zoning_kc_consol_20.shp") %>%
     dplyr::rename_if(not_sfc,snakecase::to_screaming_snake_case) %>%
     sf::st_as_sf() %>%
     sf::st_transform(2926)

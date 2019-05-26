@@ -32,7 +32,7 @@ prepare_census_place <- function(path){
 #' @export
 make_census_place <- function(path){
 
-  census_place_wa <- sf::st_read(path) %>%
+  census_place_wa <- sf::read_sf(path) %>%
     sf::st_transform(2926)
 
   census_place <- census_place_wa

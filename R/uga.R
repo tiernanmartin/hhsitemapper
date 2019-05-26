@@ -27,7 +27,7 @@ make_uga <- function(path, king_county){
 
   unzip(zipfile = path, exdir = dirname(path))
 
-  uga_wa <- sf::st_read("extdata/osf/urban_growth/urban_growth.shp") %>%
+  uga_wa <- sf::read_sf("extdata/osf/urban_growth/urban_growth.shp") %>%
     dplyr::rename_if(not_sfc,snakecase::to_screaming_snake_case) %>%
     sf::st_as_sf() %>%
     sf::st_transform(2926)
