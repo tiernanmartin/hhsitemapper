@@ -137,3 +137,10 @@ recode_logical_yesno <- function(x){
 
 #' @keywords internal
 str_clean_upper <- function(x){stringr::str_to_upper(stringr::str_trim(stringr::str_squish(stringr::str_replace_all(x,"^[:punct:]]",""))))}
+
+#' @keywords internal
+st_intersects_any <- function(x,y){
+  sf::st_intersects(x,y) %>%
+    purrr::map_lgl(~ length(.x)>0)
+}
+

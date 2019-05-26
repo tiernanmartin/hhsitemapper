@@ -8,7 +8,6 @@ prepare_king_county <- function(path){
 
   # GET DATA ----------------------------------------------------------------
 
-  options(tigris_class = 'sf')
 
   kc <- tigris::counties(state = 53) %>%
     dplyr::filter(NAME %in% "King") %>%

@@ -33,7 +33,8 @@ get_workflow_plan <- function(){
 #' @export
 get_data_source_plan <- function(){
 
-  options(drake_make_menu = FALSE)
+  options(drake_make_menu = FALSE,
+          tigris_class = 'sf')
 
   prep_plan <- drake_plan(
     tax_status_prep_status = target(command = prepare_tax_status(path = file_out("extdata/source/tax_status.txt")),
@@ -61,7 +62,19 @@ get_data_source_plan <- function(){
     uga_prep_status = target(command = prepare_uga(path = file_out("extdata/source/urban_growth_SHP.zip")),
                              trigger = trigger(mode = "blacklist", condition = FALSE)),
     zoning_prep_status = target(command = prepare_zoning(path = file_out("extdata/source/zoning_kc_consol_20_SHP.zip")),
-                             trigger = trigger(mode = "blacklist", condition = FALSE))
+                             trigger = trigger(mode = "blacklist", condition = FALSE)),
+    kc_city_prep_status = target(command = prepare_kc_city(path = file_out("extdata/source/city_kc_SHP.zip")),
+                             trigger = trigger(mode = "blacklist", condition = FALSE)),
+    census_tracts_prep_status = target(command = prepare_census_tracts(path = file_out("extdata/source/census_tracts.gpkg")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    zcta_prep_status = target(command = prepare_zcta(path = file_out("extdata/source/zcta.gpkg")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    census_place_prep_status = target(command = prepare_census_place(path = file_out("extdata/source/census_place.gpkg")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    school_districts_prep_status = target(command = prepare_school_districts(path = file_out("extdata/source/schdst_SHP.zip")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    leg_districts_prep_status = target(command = prepare_leg_districts(path = file_out("extdata/source/legdst_SHP.zip")),
+                                     trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
   upload_plan <- drake_plan(
@@ -143,7 +156,43 @@ get_data_source_plan <- function(){
                                                     file_id =  "5hjxa",
                                                     path = file_in("extdata/source/zoning_kc_consol_20_SHP.zip"),
                                                     osf_dirpath = "data/raw-data/"),
-                               trigger = trigger(mode = "blacklist", condition = FALSE))
+                               trigger = trigger(mode = "blacklist", condition = FALSE)),
+    kc_city_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                    project_id = "pvu6f",
+                                                    file_id =  "8zfd4",
+                                                    path = file_in("extdata/source/city_kc_SHP.zip"),
+                                                    osf_dirpath = "data/raw-data/"),
+                               trigger = trigger(mode = "blacklist", condition = FALSE)),
+    census_tracts_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "tq4b9",
+                                                            path = file_in("extdata/source/census_tracts.gpkg"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    zcta_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "n5rhf",
+                                                            path = file_in("extdata/source/zcta.gpkg"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    census_place_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "w69pb",
+                                                            path = file_in("extdata/source/census_place.gpkg"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    school_districts_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "8svty",
+                                                            path = file_in("extdata/source/schdst_SHP.zip"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    leg_districts_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  "v4xk7",
+                                                            path = file_in("extdata/source/legdst_SHP.zip"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = FALSE))
 
   )
 
@@ -195,7 +244,19 @@ get_data_cache_plan <- function(){
     uga_filepath = target(command = osf_download_file(osf_id = "vnsfw", path = file_out("extdata/osf/urban_growth_SHP.zip")),
                           trigger = trigger(change = osf_get_file_version(osf_id = "vnsfw"))),
     zoning_filepath = target(command = osf_download_file(osf_id = "5hjxa", path = file_out("extdata/osf/zoning_kc_consol_20_SHP.zip")),
-                          trigger = trigger(change = osf_get_file_version(osf_id = "5hjxa")))
+                          trigger = trigger(change = osf_get_file_version(osf_id = "5hjxa"))),
+    kc_city_filepath = target(command = osf_download_file(osf_id = "8zfd4", path = file_out("extdata/osf/city_kc_SHP.zip")),
+                          trigger = trigger(change = osf_get_file_version(osf_id = "8zfd4"))),
+    census_tracts_filepath = target(command = osf_download_file(osf_id = "tq4b9", path = file_out("extdata/osf/census_tracts.gpkg")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "tq4b9"))),
+    zcta_filepath = target(command = osf_download_file(osf_id = "n5rhf", path = file_out("extdata/osf/zcta.gpkg")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "n5rhf"))),
+    census_place_filepath = target(command = osf_download_file(osf_id = "w69pb", path = file_out("extdata/osf/census_place.gpkg")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "w69pb"))),
+    school_districts_filepath = target(command = osf_download_file(osf_id = "8svty", path = file_out("extdata/osf/schdst_SHP.zip")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "8svty"))),
+    leg_districts_filepath = target(command = osf_download_file(osf_id = "v4xk7", path = file_out("extdata/osf/legdst_SHP.zip")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "v4xk7")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -226,7 +287,13 @@ get_data_cache_plan <- function(){
     wa_major_waterbodies = make_wa_major_waterbodies(path = file_in("extdata/osf/ECY_WAT_NHDWAMajor.zip")),
     kc_waterbodies = make_kc_waterbodies(wa_major_waterbodies, king_county),
     uga = make_uga(path = file_in("extdata/osf/urban_growth_SHP.zip"), king_county),
-    zoning = make_zoning(path = file_in("extdata/osf/zoning_kc_consol_20_SHP.zip"))
+    zoning = make_zoning(path = file_in("extdata/osf/zoning_kc_consol_20_SHP.zip")),
+    kc_city = make_kc_city(path = file_in("extdata/osf/city_kc_SHP.zip")),
+    census_tracts = make_census_tracts(path = file_in("extdata/osf/census_tracts.gpkg")),
+    zcta = make_zcta(path = file_in("extdata/osf/zcta.gpkg"), king_county),
+    census_place = make_census_place(path = file_in("extdata/osf/census_place.gpkg")),
+    school_districts = make_school_districts(path = file_in("extdata/osf/schdst_SHP.zip")),
+    leg_districts = make_leg_districts(path = file_in("extdata/osf/legdst_SHP.zip"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)
