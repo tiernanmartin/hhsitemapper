@@ -86,7 +86,13 @@ get_data_source_plan <- function(){
     play_spaces_osm_prep_status = target(command = prepare_play_spaces_osm(path = file_out("extdata/source/play_spaces_osm.gpkg")),
                                      trigger = trigger(mode = "blacklist", condition = FALSE)),
     mj_businesses_prep_status = target(command = prepare_mj_businesses(path = file_out("extdata/source/MarijuanaApplicants.xls")),
-                                     trigger = trigger(mode = "blacklist", condition = TRUE))
+                                     trigger = trigger(mode = "blacklist", condition = TRUE)),
+    other_suitability_characteristics_prep_status = target(command = prepare_other_suitability_characteristics(path = file_out("extdata/source/other_suitability_characteristics.rda")),
+                                         trigger = trigger(mode = "blacklist", condition = FALSE)),
+    seattle_dev_cap_prep_status = target(command = prepare_seattle_dev_cap(path = file_out("extdata/source/seattle_dev_cap.csv")),
+                                            trigger = trigger(mode = "blacklist", condition = FALSE)),
+    future_lightrail_prep_status = target(command = prepare_future_lightrail(path = file_out("extdata/source/future_lightrail.gpkg")),
+                                            trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
   upload_plan <- drake_plan(
@@ -237,10 +243,34 @@ get_data_source_plan <- function(){
                                        trigger = trigger(mode = "blacklist", condition = FALSE)),
     mj_businesses_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
                                                             project_id = "pvu6f",
-                                                            file_id =  NULL,
+                                                            file_id =  "3m5eh",
                                                             path = file_in("extdata/source/MarijuanaApplicants.xls"),
                                                             osf_dirpath = "data/raw-data/"),
-                                       trigger = trigger(mode = "blacklist", condition = TRUE))
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    other_suitability_characteristics_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                project_id = "pvu6f",
+                                                                file_id = "wub8k",
+                                                                path = file_in("extdata/source/other_suitability_characteristics.rda"),
+                                                                osf_dirpath = "data/raw-data"),
+                                           trigger = trigger(mode = "blacklist", condition = FALSE)),
+    seattle_dev_cap_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                   project_id = "pvu6f",
+                                                                   file_id = "vby7h",
+                                                                   path = file_in("extdata/source/seattle_dev_cap.csv"),
+                                                                   osf_dirpath = "data/raw-data"),
+                                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    affordable_housing_properties_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                   project_id = "pvu6f",
+                                                                   file_id = "2e9sb",
+                                                                   path = file_in("extdata/source/NHPD Properties Only Export.xlsx"),
+                                                                   osf_dirpath = "data/raw-data"),
+                                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    future_lightrail_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                   project_id = "pvu6f",
+                                                                   file_id = "zkphb",
+                                                                   path = file_in("extdata/source/future_lightrail.gpkg"),
+                                                                   osf_dirpath = "data/raw-data"),
+                                              trigger = trigger(mode = "blacklist", condition = FALSE))
 
   )
 
@@ -316,7 +346,15 @@ get_data_cache_plan <- function(){
     play_spaces_osm_filepath = target(command = osf_download_file(osf_id = "4prez", path = file_out("extdata/osf/play_spaces_osm.gpkg")),
                                   trigger = trigger(change = osf_get_file_version(osf_id = "4prez"))),
     mj_businesses_filepath = target(command = osf_download_file(osf_id = "3m5eh", path = file_out("extdata/osf/MarijuanaApplicants.xls")),
-                                  trigger = trigger(change = osf_get_file_version(osf_id = "3m5eh")))
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "3m5eh"))),
+    other_suitability_characteristics_filepath = target(command = osf_download_file(osf_id = "wub8k", path = file_out("extdata/osf/other_suitability_characteristics.rda")),
+                                      trigger = trigger(change = osf_get_file_version(osf_id = "wub8k"))),
+    seattle_dev_cap_filepath = target(command = osf_download_file(osf_id = "vby7h", path = file_out("extdata/osf/seattle_dev_cap.csv")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "vby7h"))),
+    affordable_housing_properties_filepath = target(command = osf_download_file(osf_id = "2e9sb", path = file_out("extdata/osf/NHPD Properties Only Export.xlsx")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "2e9sb"))),
+    future_lightrail_filepath = target(command = osf_download_file(osf_id = "zkphb", path = file_out("extdata/osf/future_lightrail.gpkg")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "zkphb")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -359,7 +397,12 @@ get_data_cache_plan <- function(){
     bus_stops_metro = make_bus_stops_metro(path = file_in("extdata/osf/transitstop_SHP.zip")),
     transit_stops_osm = make_transit_stops_osm(path = file_in("extdata/osf/transit_stops_osm.gpkg")),
     play_spaces_osm = make_play_spaces_osm(path = file_in("extdata/osf/play_spaces_osm.gpkg")),
-    mj_businesses = make_mj_businesses(path = file_in("extdata/osf/MarijuanaApplicants.xls"))
+    mj_businesses = make_mj_businesses(path = file_in("extdata/osf/MarijuanaApplicants.xls")),
+    el_facilities = make_el_facilities("extdata/source/FutureWise EC Facility Data Request.xlsx"),
+    other_suitability_characteristics = make_other_suitability_characteristics(path = file_in("extdata/osf/other_suitability_characteristics.rda")),
+    seattle_dev_cap = make_seattle_dev_cap(path = file_in("extdata/osf/seattle_dev_cap.csv")),
+    affordable_housing_properties = make_affordable_housing_properties(path = file_in("extdata/osf/NHPD Properties Only Export.xlsx")),
+    future_lightrail = make_future_lightrail(path = file_in("extdata/osf/future_lightrail.gpkg"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)
