@@ -44,9 +44,9 @@ make_parcel_df_ready <- function(parcel_lookup, prop_type, pub_parcel, parcel_df
   parcel_df_recoded <- parcel_df %>%
     dplyr::select_at(dplyr::vars(fine_cols)) %>%
     dplyr::bind_cols(parcel_recode_cols) %>%
-    dplyr::mutate_if(is_logical_yn, hhsitemapper::recode_logical_yn) %>%
-    dplyr::mutate_if(is_logical_01, hhsitemapper::recode_logical_01) %>%
-    dplyr::mutate_if(is_logical_yesno, hhsitemapper::recode_logical_yesno) %>%
+    dplyr::mutate_if(is_logical_yn, recode_logical_yn) %>%
+    dplyr::mutate_if(is_logical_01, recode_logical_01) %>%
+    dplyr::mutate_if(is_logical_yesno, recode_logical_yesno) %>%
     dplyr::mutate(PIN = make_pin(MAJOR, MINOR),
            PROPERTY_NAME = str_clean_upper(PROP_NAME))
 
