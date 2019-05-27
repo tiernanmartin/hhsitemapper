@@ -144,3 +144,11 @@ st_intersects_any <- function(x,y){
     purrr::map_lgl(~ length(.x)>0)
 }
 
+#' @keywords internal
+str_unique_lower <- function(x){
+
+  string <- stringr::str_c(unique(stringr::str_to_lower(stringr::str_replace(x,"_"," "))),collapse = ", ")
+
+  if(length(string) == 0){return("none")}else(return(string))
+
+}
