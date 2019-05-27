@@ -84,7 +84,9 @@ get_data_source_plan <- function(){
     transit_stops_osm_prep_status = target(command = prepare_transit_stops_osm(path = file_out("extdata/source/transit_stops_osm.gpkg")),
                                      trigger = trigger(mode = "blacklist", condition = FALSE)),
     play_spaces_osm_prep_status = target(command = prepare_play_spaces_osm(path = file_out("extdata/source/play_spaces_osm.gpkg")),
-                                     trigger = trigger(mode = "blacklist", condition = FALSE))
+                                     trigger = trigger(mode = "blacklist", condition = FALSE)),
+    mj_businesses_prep_status = target(command = prepare_mj_businesses(path = file_out("extdata/source/MarijuanaApplicants.xls")),
+                                     trigger = trigger(mode = "blacklist", condition = TRUE))
   )
 
   upload_plan <- drake_plan(
@@ -232,7 +234,13 @@ get_data_source_plan <- function(){
                                                             file_id =  "4prez",
                                                             path = file_in("extdata/source/play_spaces_osm.gpkg"),
                                                             osf_dirpath = "data/raw-data/"),
-                                       trigger = trigger(mode = "blacklist", condition = FALSE))
+                                       trigger = trigger(mode = "blacklist", condition = FALSE)),
+    mj_businesses_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                            project_id = "pvu6f",
+                                                            file_id =  NULL,
+                                                            path = file_in("extdata/source/MarijuanaApplicants.xls"),
+                                                            osf_dirpath = "data/raw-data/"),
+                                       trigger = trigger(mode = "blacklist", condition = TRUE))
 
   )
 
@@ -306,7 +314,9 @@ get_data_cache_plan <- function(){
     transit_stops_osm_filepath = target(command = osf_download_file(osf_id = "zk826", path = file_out("extdata/osf/transit_stops_osm.gpkg")),
                                   trigger = trigger(change = osf_get_file_version(osf_id = "zk826"))),
     play_spaces_osm_filepath = target(command = osf_download_file(osf_id = "4prez", path = file_out("extdata/osf/play_spaces_osm.gpkg")),
-                                  trigger = trigger(change = osf_get_file_version(osf_id = "4prez")))
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "4prez"))),
+    mj_businesses_filepath = target(command = osf_download_file(osf_id = "3m5eh", path = file_out("extdata/osf/MarijuanaApplicants.xls")),
+                                  trigger = trigger(change = osf_get_file_version(osf_id = "3m5eh")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -348,7 +358,8 @@ get_data_cache_plan <- function(){
     seattle_council_districts = make_seattle_council_districts(path = file_in("extdata/osf/sccdst_SHP.zip")),
     bus_stops_metro = make_bus_stops_metro(path = file_in("extdata/osf/transitstop_SHP.zip")),
     transit_stops_osm = make_transit_stops_osm(path = file_in("extdata/osf/transit_stops_osm.gpkg")),
-    play_spaces_osm = make_play_spaces_osm(path = file_in("extdata/osf/play_spaces_osm.gpkg"))
+    play_spaces_osm = make_play_spaces_osm(path = file_in("extdata/osf/play_spaces_osm.gpkg")),
+    mj_businesses = make_mj_businesses(path = file_in("extdata/osf/MarijuanaApplicants.xls"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)
