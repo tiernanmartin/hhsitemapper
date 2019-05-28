@@ -7,6 +7,7 @@
 #'   \item{User registration is required to access this data}
 #'   \item{User-applied filters: State = "WA", County = "King"}
 #' }
+#' @rdname affordable_housing_properties
 #' @export
 make_affordable_housing_properties <- function(path){
 

@@ -15,7 +15,10 @@ get_workflow_plan <- function(){
 
   workflow_plan <- drake::bind_plans(
     get_data_source_plan(),  # this only needs to be included when a data source is added or changed
-    get_data_cache_plan()
+    get_data_cache_plan(),
+    get_parcel_plan(),
+    get_development_assumptions_plan(),
+    get_official_names_plan()
   )
 
   return(workflow_plan)
@@ -116,7 +119,9 @@ get_data_source_plan <- function(){
     official_names_higher_ed_providers_prep_status = target(command = prepare_official_names_higher_ed_providers(path = file_out("extdata/source/official_names_higher_ed_providers.csv")),
                                                             trigger = trigger(mode = "blacklist", condition = FALSE)),
     official_names_hospitals_prep_status = target(command = prepare_official_names_hospitals(path = file_out("extdata/source/official_names_hospitals.csv")),
-                                                  trigger = trigger(mode = "blacklist", condition = FALSE))
+                                                  trigger = trigger(mode = "blacklist", condition = FALSE)),
+    development_assumptions_zoning_prep_status = target(command = prepare_development_assumptions_zoning(path = file_out("extdata/source/development_assumptions_zoning.csv")),
+                                                        trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
   upload_plan <- drake_plan(
@@ -366,7 +371,13 @@ get_data_source_plan <- function(){
                                                                          file_id = "mcrb4",
                                                                          path = file_in("extdata/source/official_names_hospitals.csv"),
                                                                          osf_dirpath = "data/raw-data/official-names"),
-                                                    trigger = trigger(mode = "blacklist", condition = FALSE))
+                                                    trigger = trigger(mode = "blacklist", condition = FALSE)),
+    development_assumptions_zoning_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                                               project_id = "pvu6f",
+                                                                               file_id = "ynhd6",
+                                                                               path = file_in("extdata/source/development_assumptions_zoning.csv"),
+                                                                               osf_dirpath = "data/raw-data"),
+                                                          trigger = trigger(mode = "blacklist", condition = FALSE))
 
   )
 
@@ -474,7 +485,9 @@ get_data_cache_plan <- function(){
     official_names_higher_ed_providers_filepath = target(command = osf_download_file(osf_id = "cj7s3", path = file_out("extdata/osf/official_names_higher_ed_providers.csv")),
                                                          trigger = trigger(change = osf_get_file_version(osf_id = "cj7s3"))),
     official_names_hospitals_filepath = target(command = osf_download_file(osf_id = "mcrb4", path = file_out("extdata/osf/official_names_hospitals.csv")),
-                                               trigger = trigger(change = osf_get_file_version(osf_id = "mcrb4")))
+                                               trigger = trigger(change = osf_get_file_version(osf_id = "mcrb4"))),
+    development_assumptions_zoning_filepath = target(command = osf_download_file(osf_id = "ynhd6", path = file_out("extdata/osf/development_assumptions_zoning.csv")),
+                             trigger = trigger(change = osf_get_file_version(osf_id = "ynhd6")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -500,7 +513,6 @@ get_data_cache_plan <- function(){
     parcel_df_ready =  make_parcel_df_ready(parcel_lookup, prop_type, pub_parcel, parcel_df),
     parcel_acct_ready = make_parcel_acct_ready(acct, tax_status, tax_reason),
     parcel_env_ready = make_parcel_env_ready(env_restrictions),
-    parcel_ready = make_parcel_ready(parcel_addr_ready, parcel_env_ready, parcel_acct_ready, parcel_sf_ready, parcel_df_ready),
     king_county = make_king_county(path = file_in("extdata/osf/king_county.gpkg")),
     wa_major_waterbodies = make_wa_major_waterbodies(path = file_in("extdata/osf/ECY_WAT_NHDWAMajor.zip")),
     kc_waterbodies = make_kc_waterbodies(wa_major_waterbodies, king_county),
@@ -537,18 +549,7 @@ get_data_cache_plan <- function(){
     official_names_school_districts = make_official_names_school_districts(official_names_special_purpose_districts),
     official_names_higher_ed_providers = make_official_names_higher_ed_providers(path = file_in("extdata/osf/official_names_higher_ed_providers.csv")),
     official_names_hospitals = make_official_names_hospitals(path = file_in("extdata/osf/official_names_hospitals.csv")),
-    official_names = make_official_names(official_names_seattle,
-      official_names_kc,
-      official_names_wa,
-      official_names_us,
-      official_names_places,
-      official_names_tribes,
-      official_names_housing_authorities,
-      official_names_regional_transit_authorities,
-      official_names_special_purpose_districts,
-      official_names_school_districts,
-      official_names_higher_ed_providers,
-      official_names_hospitals)
+    development_assumptions_zoning = make_development_assumptions_zoning(path = file_in("extdata/osf/development_assumptions_zoning.csv"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)
@@ -558,5 +559,75 @@ get_data_cache_plan <- function(){
 
 }
 
+
+# SUITABILITY AND UTILIZATION PLANS ---------------------------------------
+
+get_parcel_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  parcel_plan <- drake::drake_plan(
+    parcel_ready = make_parcel_ready(parcel_addr_ready,
+                                     parcel_env_ready,
+                                     parcel_acct_ready,
+                                     parcel_sf_ready,
+                                     parcel_df_ready)
+  )
+
+  return(parcel_plan)
+
+}
+
+get_development_assumptions_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  development_assumptions_plan <- drake::drake_plan(
+    city_block_sqft = make_city_block_sqft(),
+    city_block_acre = make_city_block_acre(city_block_sqft),
+    lot_types = make_lot_types(),
+    lot_size_breaks = make_lot_size_breaks(city_block_acre),
+    lot_development_parameters = make_lot_development_parameters(),
+    development_assumptions_lot = make_development_assumptions_lot(lot_types, lot_development_parameters, development_assumptions_zoning)
+  )
+
+  return(development_assumptions_plan)
+}
+
+# FILTERS AND HELPERS PLANS -----------------------------------------------
+
+get_official_names_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  official_names_plan <- drake::drake_plan(
+    official_names = make_official_names(official_names_seattle,
+                                         official_names_kc,
+                                         official_names_wa,
+                                         official_names_us,
+                                         official_names_places,
+                                         official_names_tribes,
+                                         official_names_housing_authorities,
+                                         official_names_regional_transit_authorities,
+                                         official_names_special_purpose_districts,
+                                         official_names_school_districts,
+                                         official_names_higher_ed_providers,
+                                         official_names_hospitals)
+  )
+
+  return(official_names_plan)
+
+}
+
+# INVENTORY PLAN ----------------------------------------------------------
+
+
+
+
+# DOCUMENTATION PLAN ------------------------------------------------------
+
+
+
+# EXPORT PLAN -------------------------------------------------------------
 
 
