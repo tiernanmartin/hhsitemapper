@@ -2,9 +2,12 @@
 % Please edit documentation in R/affordable_housing_properties.R
 \name{make_affordable_housing_properties}
 \alias{make_affordable_housing_properties}
+\alias{view_affordable_housing_properties}
 \title{Affordable Housing Properties (King County)}
 \usage{
 make_affordable_housing_properties(path)
+
+view_affordable_housing_properties()
 }
 \value{
 Returns an \code{\link[sf:sf]{sf object}}.
@@ -20,3 +23,4 @@ Affordable housing properties within King County, Washington.
 \item{User-applied filters: State = "WA", County = "King"}
 }
 }
+\keyword{internal}
