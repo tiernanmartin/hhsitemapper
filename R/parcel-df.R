@@ -71,6 +71,7 @@ make_parcel_df_ready <- function(parcel_lookup, prop_type, pub_parcel, parcel_df
               TOPOGRAPHY,
               RESTRICTIVE_SZ_SHAPE,
               PCNT_UNUSABLE,
+              UNBUILDABLE,
               CONTAMINATION,
               HISTORIC_SITE,
               CURRENT_USE_DESIGNATION,

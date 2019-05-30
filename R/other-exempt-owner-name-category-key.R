@@ -19,7 +19,7 @@ prepare_other_exempt_owner_name_category_key <- function(path){
 
   # WRITE -------------------------------------------------------------------
 
-  readr::write_rds(other_exempt_owner_name_category_key, path)
+  readr::write_csv(other_exempt_owner_name_category_key, path)
 
 
   # RETURN ------------------------------------------------------------------

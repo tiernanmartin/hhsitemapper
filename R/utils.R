@@ -145,10 +145,61 @@ st_intersects_any <- function(x,y){
 }
 
 #' @keywords internal
+st_intersect_area <- function(x, y){
+
+  x_sfc <- x %>%
+    sf::st_geometry() %>%
+    sf::st_transform(sf::st_crs(y))
+
+  area_x <- x_sfc %>% sf::st_area() %>% as.double()
+
+  area_xy <- sf::st_intersection(x_sfc, y) %>% sf::st_area() %>% as.double()
+
+  if(purrr::is_empty(area_xy)){return(as.double(0))}
+
+  overlap_pct <- area_xy %>%
+    magrittr::divide_by(area_x) %>%
+    as.double() %>%
+    round(2)
+
+  return(overlap_pct)
+}
+
+#' @keywords internal
+st_over <- function(x,y,col){
+  idx <- sapply(sf::st_intersects(x,y), function(z) if (length(z)==0) NA_integer_ else z[1])
+
+  y[idx,col][[1]]
+}
+
+#' @keywords internal
+st_area_ratio <- function(x){
+
+  x$poly_area <- sf::st_area(x)
+  x$min_bound_cicle <- lwgeom::st_minimum_bounding_circle(x, nQuadSegs = 10)
+  x$min_bound_cicle_area <- sf::st_area(x$min_bound_cicle)
+  x$area_ratio <- as.double(x$poly_area/x$min_bound_cicle_area)
+
+  return(x$area_ratio)
+
+}
+
+#' @keywords internal
 str_unique_lower <- function(x){
 
   string <- stringr::str_c(unique(stringr::str_to_lower(stringr::str_replace(x,"_"," "))),collapse = ", ")
 
   if(length(string) == 0){return("none")}else(return(string))
+
+}
+
+#' @keywords internal
+first_not_na <- function(x){
+        if(all(sapply(x,is.na))){
+                as(NA,class(x))
+                }else{
+                x[!sapply(x,is.na)][1]
+        }
+
 
 }

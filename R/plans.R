@@ -18,6 +18,9 @@ get_workflow_plan <- function(){
     get_data_cache_plan(),
     get_parcel_plan(),
     get_development_assumptions_plan(),
+    get_owner_plan(),
+    get_suitability_criteria_plan(),
+    get_suitability_plan(),
     get_official_names_plan()
   )
 
@@ -52,7 +55,7 @@ get_data_source_plan <- function(){
                                          trigger = trigger(mode = "blacklist", condition = FALSE)),
     public_owner_name_category_key_prep_status = target(command = prepare_public_owner_name_category_key(path = file_out("extdata/source/public_owner_name_category_key.rda")),
                                                         trigger = trigger(mode = "blacklist", condition = FALSE)),
-    other_exempt_owner_name_category_key_prep_status = target(command = prepare_other_exempt_owner_name_category_key(path = file_out("extdata/source/other_exempt_owner_name_category_key.rda")),
+    other_exempt_owner_name_category_key_prep_status = target(command = prepare_other_exempt_owner_name_category_key(path = file_out("extdata/source/other_exempt_owner_name_category_key.csv")),
                                                               trigger = trigger(mode = "blacklist", condition = FALSE)),
     owner_antijoin_names_prep_status = target(command = prepare_owner_antijoin_names(path = file_out("extdata/source/owner_antijoin_names.csv")),
                                               trigger = trigger(mode = "blacklist", condition = FALSE)),
@@ -164,8 +167,8 @@ get_data_source_plan <- function(){
                                                           trigger = trigger(mode = "blacklist", condition = FALSE)),
     other_exempt_owner_name_category_key_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
                                                                                      project_id = "pvu6f",
-                                                                                     file_id = "frbxu",
-                                                                                     path = file_in("extdata/source/other_exempt_owner_name_category_key.rda"),
+                                                                                     file_id = "2k3dp",
+                                                                                     path = file_in("extdata/source/other_exempt_owner_name_category_key.csv"),
                                                                                      osf_dirpath = "data/raw-data"),
                                                                 trigger = trigger(mode = "blacklist", condition = FALSE)),
     owner_antijoin_names_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
@@ -410,8 +413,8 @@ get_data_cache_plan <- function(){
                                       trigger = trigger(change = osf_get_file_version(osf_id = "4azv5"))),
     public_owner_name_category_key_filepath = target(command = osf_download_file(osf_id = "8az7h", path = file_out("extdata/osf/public_owner_name_category_key.rda")),
                                                      trigger = trigger(change = osf_get_file_version(osf_id = "8az7h"))),
-    other_exempt_owner_name_category_key_filepath = target(command = osf_download_file(osf_id = "frbxu", path = file_out("extdata/osf/other_exempt_owner_name_category_key.rda")),
-                                                           trigger = trigger(change = osf_get_file_version(osf_id = "frbxu"))),
+    other_exempt_owner_name_category_key_filepath = target(command = osf_download_file(osf_id = "2k3dp", path = file_out("extdata/osf/other_exempt_owner_name_category_key.csv")),
+                                                           trigger = trigger(change = osf_get_file_version(osf_id = "2k3dp"))),
     owner_antijoin_names_filepath = target(command = osf_download_file(osf_id = "t7zpe", path = file_out("extdata/osf/owner_antijoin_names.csv")),
                                            trigger = trigger(change = osf_get_file_version(osf_id = "t7zpe"))),
     pub_parcel_filepath = target(command = osf_download_file(osf_id = "5f7bd", path = file_out("extdata/osf/pub_parcel.csv")),
@@ -487,7 +490,7 @@ get_data_cache_plan <- function(){
     official_names_hospitals_filepath = target(command = osf_download_file(osf_id = "mcrb4", path = file_out("extdata/osf/official_names_hospitals.csv")),
                                                trigger = trigger(change = osf_get_file_version(osf_id = "mcrb4"))),
     development_assumptions_zoning_filepath = target(command = osf_download_file(osf_id = "ynhd6", path = file_out("extdata/osf/development_assumptions_zoning.csv")),
-                             trigger = trigger(change = osf_get_file_version(osf_id = "ynhd6")))
+                                                     trigger = trigger(change = osf_get_file_version(osf_id = "ynhd6")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -500,7 +503,7 @@ get_data_cache_plan <- function(){
     parcel_lookup = make_parcel_lookup(parcel_metadata_table, lookup, present_use_recode),
     name_recode_key = make_name_recode_key(path = file_in("extdata/osf/name_recode_key.rda")),
     public_owner_name_category_key = make_public_owner_name_category_key(path = file_in("extdata/osf/public_owner_name_category_key.rda")),
-    other_exempt_owner_name_category_key = make_other_exempt_owner_name_category_key(path = file_in("extdata/osf/other_exempt_owner_name_category_key.rda")),
+    other_exempt_owner_name_category_key = make_other_exempt_owner_name_category_key(path = file_in("extdata/osf/other_exempt_owner_name_category_key.csv")),
     owner_antijoin_names = make_owner_antijoin_names(path = file_in("extdata/osf/owner_antijoin_names.csv")),
     pub_parcel = make_pub_parcel(path = file_in("extdata/osf/pub_parcel.csv")),
     acct = make_acct(path = file_in("extdata/source/Real_Property_Account_Extract_2010515.csv")),
@@ -594,6 +597,70 @@ get_development_assumptions_plan <- function(){
   return(development_assumptions_plan)
 }
 
+get_suitability_criteria_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  suitability_criteria_plan <- drake::drake_plan(
+    criteria_tax_exempt = make_criteria_tax_exempt(),
+    criteria_max_water_overlap_pct = make_criteria_max_water_overlap_pct(),
+    criteria_within_uga = make_criteria_within_uga(),
+    criteria_developable_zoning = make_criteria_developable_zoning(development_assumptions_zoning),
+    criteria_undevelopable_present_use = make_criteria_undevelopable_present_use(),
+    criteria_lot_size = make_criteria_lot_size(lot_size_breaks),
+    criteria_area_ratio = make_criteria_area_ratio(),
+    criteria_steep_vacant = make_criteria_steep_vacant(),
+    criteria_unbuildable = make_criteria_unbuildable(),
+    criteria_other = make_criteria_other(),
+    suitability_criteria = make_suitability_criteria(criteria_tax_exempt,
+                                                     criteria_max_water_overlap_pct,
+                                                     criteria_within_uga,
+                                                     criteria_developable_zoning,
+                                                     criteria_undevelopable_present_use,
+                                                     criteria_lot_size,
+                                                     criteria_area_ratio,
+                                                     criteria_steep_vacant,
+                                                     criteria_unbuildable,
+                                                     criteria_other)
+  )
+
+  return(suitability_criteria_plan)
+
+}
+
+
+get_suitability_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  suitability_plan <- drake::drake_plan(
+    suitability_tax_exempt = make_suitability_tax_exempt(parcel_ready),
+    suitability_water_overlap = make_suitability_water_overlap(parcel_sf_ready, kc_waterbodies, king_county),
+    suitability_within_uga = make_suitability_within_uga(parcel_sf_ready, uga),
+    suitability_developable_zoning = make_suitability_developable_zoning(parcel_sf_ready, zoning),
+    suitability_present_use = make_suitability_present_use(parcel_ready),
+    suitability_lot_size = make_suitability_lot_size(parcel_sf_ready, lot_size_breaks),
+    suitability_parcel_area_ratio = make_suitability_parcel_area_ratio(parcel_sf_ready),
+    suitability_steep_vacant = make_suitability_steep_vacant(parcel_ready),
+    suitability_unbuildable = make_suitability_unbuildable(parcel_ready),
+    suitability_other = make_suitability_other(parcel_ready, other_suitability_characteristics),
+    suitability = make_suitability(parcel_ready,
+                                   suitability_criteria,
+                                   suitability_tax_exempt,
+                                   suitability_water_overlap,
+                                   suitability_within_uga,
+                                   suitability_developable_zoning,
+                                   suitability_present_use,
+                                   suitability_lot_size,
+                                   suitability_parcel_area_ratio,
+                                   suitability_steep_vacant,
+                                   suitability_unbuildable,
+                                   suitability_other)
+  )
+
+  return(suitability_plan)
+}
+
 # FILTERS AND HELPERS PLANS -----------------------------------------------
 
 get_official_names_plan <- function(){
@@ -618,6 +685,19 @@ get_official_names_plan <- function(){
   return(official_names_plan)
 
 }
+
+get_owner_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  owner_plan <- drake::drake_plan(
+    owner_name_full = make_owner_name_full(suitability, name_recode_key, owner_antijoin_names),
+    owner_category = make_owner_category(owner_name_full, public_owner_name_category_key, other_exempt_owner_name_category_key)
+  )
+
+  return(owner_plan)
+}
+
 
 # INVENTORY PLAN ----------------------------------------------------------
 
