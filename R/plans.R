@@ -17,6 +17,7 @@ get_workflow_plan <- function(){
     get_data_source_plan(),  # this only needs to be included when a data source is added or changed
     get_data_cache_plan(),
     get_parcel_plan(),
+    get_building_plan(),
     get_development_assumptions_plan(),
     get_owner_plan(),
     get_suitability_criteria_plan(),
@@ -425,6 +426,14 @@ get_data_cache_plan <- function(){
                                   trigger = trigger(change = osf_get_file_version(osf_id = "x9zwq"))),
     # add parcel_df,
     # add parcel_sf_poly,
+    building_residential_filepath = target(command = osf_download_file(osf_id = "356ph", path = file_out("extdata/osf/EXTR_ResBldg.csv")),
+                                           trigger = trigger(change = osf_get_file_version(osf_id = "356ph"))),
+    building_apartment_filepath = target(command = osf_download_file(osf_id = "5bj39", path = file_out("extdata/osf/EXTR_AptComplex.csv")),
+                                         trigger = trigger(change = osf_get_file_version(osf_id = "5bj39"))),
+    building_condo_filepath = target(command = osf_download_file(osf_id = "98hrb", path = file_out("extdata/osf/EXTR_CondoComplex.csv")),
+                                     trigger = trigger(change = osf_get_file_version(osf_id = "98hrb"))),
+    building_commercial_filepath = target(command = osf_download_file(osf_id = "hmq9z", path = file_out("extdata/osf/EXTR_CommBldg.csv")),
+                                          trigger = trigger(change = osf_get_file_version(osf_id = "hmq9z"))),
     king_county_filepath = target(command = osf_download_file(osf_id = "jqsym", path = file_out("extdata/osf/king_county.gpkg")),
                                   trigger = trigger(change = osf_get_file_version(osf_id = "jqsym"))),
     wa_major_waterbodies_filepath = target(command = osf_download_file(osf_id = "p4yg5", path = file_out("extdata/osf/ECY_WAT_NHDWAMajor.zip")),
@@ -516,6 +525,10 @@ get_data_cache_plan <- function(){
     parcel_df_ready =  make_parcel_df_ready(parcel_lookup, prop_type, pub_parcel, parcel_df),
     parcel_acct_ready = make_parcel_acct_ready(acct, tax_status, tax_reason),
     parcel_env_ready = make_parcel_env_ready(env_restrictions),
+    building_residential = make_building_residential(path = file_in("extdata/osf/EXTR_ResBldg.csv")),
+    building_apartment = make_building_apartment(path = file_in("extdata/osf/EXTR_AptComplex.csv")),
+    building_condo = make_building_condo(path = file_in("extdata/osf/EXTR_CondoComplex.csv")),
+    building_commercial = make_building_commercial(path = file_in("extdata/osf/EXTR_CommBldg.csv")),
     king_county = make_king_county(path = file_in("extdata/osf/king_county.gpkg")),
     wa_major_waterbodies = make_wa_major_waterbodies(path = file_in("extdata/osf/ECY_WAT_NHDWAMajor.zip")),
     kc_waterbodies = make_kc_waterbodies(wa_major_waterbodies, king_county),
@@ -628,7 +641,6 @@ get_suitability_criteria_plan <- function(){
 
 }
 
-
 get_suitability_plan <- function(){
 
   options(drake_make_menu = FALSE)
@@ -659,6 +671,20 @@ get_suitability_plan <- function(){
   )
 
   return(suitability_plan)
+}
+
+get_building_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  building_plan <- drake::drake_plan(
+    building_template = make_building_template(),
+    building = make_building(building_template, building_residential, building_apartment, building_condo, building_commercial)
+  )
+
+  return(building_plan)
+
+
 }
 
 # FILTERS AND HELPERS PLANS -----------------------------------------------
