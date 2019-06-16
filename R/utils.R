@@ -194,6 +194,24 @@ str_unique_lower <- function(x){
 }
 
 #' @keywords internal
+str_count_factor <- function(x){
+
+  if(length(x)==1 & all(is.na(x))){return(NA_character_)}else{
+
+    fct <- factor(x)
+
+    lvls <- levels(fct)
+
+    ln <- length(lvls)
+
+    counts <- tabulate(fct, ln)
+
+    stringr::str_c(purrr::map2_chr(lvls, counts, ~stringr::str_c(.x,": ", .y)), collapse = "; ")
+
+  }
+}
+
+#' @keywords internal
 first_not_na <- function(x){
         if(all(sapply(x,is.na))){
                 as(NA,class(x))
@@ -201,5 +219,14 @@ first_not_na <- function(x){
                 x[!sapply(x,is.na)][1]
         }
 
+
+}
+
+#' @keywords internal
+lesser_of <- function(x,y){
+  x <- as.double(x)
+  y <- as.double(y)
+
+  dplyr::if_else(x<= y, x,y, missing = x)
 
 }
