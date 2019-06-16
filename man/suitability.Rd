@@ -41,7 +41,7 @@ make_suitability_unbuildable(parcel_ready)
 make_suitability_other(parcel_ready, other_suitability_characteristics)
 }
 \value{
-All suitability-related commanrs return a \code{\link[tibble:tbl_df]{tbl_df}} object.
+All suitability-related commands return a \code{\link[tibble:tbl_df]{tbl_df}} object.
 }
 \description{
 Targets related to the suitability of a site for affordable

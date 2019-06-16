@@ -1,7 +1,7 @@
 #' @title Site Suiteability
 #' @description Targets related to the suitability of a site for affordable
 #'   housing and/or early learning facility development.
-#' @return All suitability-related commanrs return a \code{\link[tibble:tbl_df]{tbl_df}} object.
+#' @return All suitability-related commands return a \code{\link[tibble:tbl_df]{tbl_df}} object.
 
 #' @rdname suitability
 #' @export

@@ -1,9 +1,9 @@
 #' @title Site Suiteability Criteria
 #' @description Targets related to the suitability _criteria_ of a site for affordable
 #'   housing and/or early learning facility development.
-#' @return All suitability criteria commanrs return a named list.
+#' @return All suitability criteria commands return a named list.
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_suitability_criteria <- function(criteria_tax_exempt,
                                       criteria_max_water_overlap_pct,
@@ -35,7 +35,7 @@ make_suitability_criteria <- function(criteria_tax_exempt,
 }
 
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_tax_exempt <- function(){
 
@@ -47,7 +47,7 @@ make_criteria_tax_exempt <- function(){
 
 }
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_max_water_overlap_pct <- function(){
 
@@ -58,7 +58,7 @@ make_criteria_max_water_overlap_pct <- function(){
   return(criteria_max_water_overlap_pct)
 }
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_within_uga <- function(){
 
@@ -69,7 +69,7 @@ make_criteria_within_uga <- function(){
   return(criteria_within_uga)
 }
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_developable_zoning <- function(development_assumptions_zoning){
 
@@ -85,7 +85,7 @@ make_criteria_developable_zoning <- function(development_assumptions_zoning){
 
 }
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_undevelopable_present_use <- function(){
 
@@ -128,7 +128,7 @@ make_criteria_undevelopable_present_use <- function(){
 
 }
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_lot_size <- function(lot_size_breaks){
 
@@ -148,7 +148,7 @@ make_criteria_lot_size <- function(lot_size_breaks){
 }
 
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_area_ratio <- function(){
 
@@ -160,7 +160,7 @@ make_criteria_area_ratio <- function(){
 
 }
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_steep_vacant <- function(){
 
@@ -169,7 +169,7 @@ make_criteria_steep_vacant <- function(){
   return(criteria_steep_vacant)
 }
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_unbuildable <- function(){
 
@@ -178,7 +178,7 @@ make_criteria_unbuildable <- function(){
   return(criteria_unbuildable)
 }
 
-#' @rdname suitability_crtieria
+#' @rdname suitability_criteria
 #' @export
 make_criteria_other <- function(){
 

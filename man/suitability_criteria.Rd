@@ -40,7 +40,7 @@ make_criteria_unbuildable()
 make_criteria_other()
 }
 \value{
-All suitability criteria commanrs return a named list.
+All suitability criteria commands return a named list.
 }
 \description{
 Targets related to the suitability \emph{criteria} of a site for affordable
