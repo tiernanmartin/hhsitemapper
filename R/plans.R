@@ -22,7 +22,10 @@ get_workflow_plan <- function(){
     get_owner_plan(),
     get_suitability_criteria_plan(),
     get_suitability_plan(),
-    get_official_names_plan()
+    get_utilization_criteria_plan(),
+    get_utilization_plan(),
+    get_official_names_plan(),
+    get_filter_plan()
   )
 
   return(workflow_plan)
@@ -594,6 +597,20 @@ get_parcel_plan <- function(){
 
 }
 
+get_building_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  building_plan <- drake::drake_plan(
+    building_template = make_building_template(),
+    building = make_building(building_template, building_residential, building_apartment, building_condo, building_commercial)
+  )
+
+  return(building_plan)
+
+
+}
+
 get_development_assumptions_plan <- function(){
 
   options(drake_make_menu = FALSE)
@@ -673,19 +690,36 @@ get_suitability_plan <- function(){
   return(suitability_plan)
 }
 
-get_building_plan <- function(){
+get_utilization_criteria_plan <- function(){
 
   options(drake_make_menu = FALSE)
 
-  building_plan <- drake::drake_plan(
-    building_template = make_building_template(),
-    building = make_building(building_template, building_residential, building_apartment, building_condo, building_commercial)
+  utilization_criteria_plan <- drake::drake_plan(
+    utilization_criteria_lot_size = make_utilization_criteria_lot_size(city_block_sqft, lot_types),
+    utilization_criteria_ratio = make_utilization_criteria_ratio(),
+    utilization_criteria_ratio_bins = make_utilization_criteria_ratio_bins(),
+    utilization_criteria = make_utilization_criteria(utilization_criteria_lot_size,
+                                                     utilization_criteria_ratio,
+                                                     utilization_criteria_ratio_bins)
   )
 
-  return(building_plan)
-
-
+  return(utilization_criteria_plan)
 }
+
+get_utilization_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  utilization_plan <- drake::drake_plan(
+    seattle_utilization_ratio = make_seattle_utilization_ratio(parcel_sf_ready, seattle_dev_cap),
+    utilization_present = make_utilization_present(parcel_ready, building),
+    utilization_lot_size = make_utilization_lot_size(parcel_ready, utilization_criteria),
+    utilization_potential = make_utilization_potential(suitability, development_assumptions_lot, utilization_lot_size)
+  )
+
+  return(utilization_plan)
+}
+
 
 # FILTERS AND HELPERS PLANS -----------------------------------------------
 
@@ -724,6 +758,26 @@ get_owner_plan <- function(){
   return(owner_plan)
 }
 
+get_filter_plan <- function(parcel_sf_ready, census_tracts){
+
+  options(drake_make_menu = FALSE)
+
+  filter_plan <- drake::drake_plan(
+    filters_census_tract = make_filters_census_tract(parcel_sf_ready, census_tracts),
+    filters_zcta = make_filters_zcta(parcel_sf_ready, zcta),
+    filters_place = make_filters_place(parcel_sf_ready, census_place),
+    filters_place_name = make_filters_place_name(parcel_df_ready, filters_place),
+    filters_owner_category = make_filters_owner_category(owner_category),
+    filters_public_owner = make_filters_public_owner(owner_category),
+    filters_zoning_category = make_filters_zoning_category(suitability_developable_zoning),
+    filters_proximity_transit = make_filters_proximity_transit(parcel_sf_ready, transit_stops_osm),
+    filters = make_filters(parcel_ready,
+                           filter_list = list(filters_census_tract))
+  )
+
+
+  return(filter_plan)
+}
 
 # INVENTORY PLAN ----------------------------------------------------------
 
