@@ -248,15 +248,15 @@ make_filters_proximity_transit <- function(parcel_sf_ready, transit_stops_osm){
 
 #' @rdname filters
 #' @export
-make_filters_proximity_play_space <- function(...){
+make_filters_proximity_play_space <- function(parcel_sf_ready, play_spaces_osm){
 
   p_pt <- parcel_sf_ready %>%
     sf::st_set_geometry("geom_pt") %>%
     sf::st_transform(2926) %>%
     dplyr::transmute(PIN)
 
-  buffer_dist_eighth <- set_units(1/8, "mile")
-  buffer_dist_qtr <- set_units(1/4, "mile")
+  buffer_dist_eighth <- units::set_units(1/8, "mile")
+  buffer_dist_qtr <- units::set_units(1/4, "mile")
 
 
   ps_buff <- play_spaces_osm
@@ -264,7 +264,6 @@ make_filters_proximity_play_space <- function(...){
   ps_buff$geom_eighth_mi_buff <- sf::st_buffer(sf::st_geometry(ps_buff), buffer_dist_eighth)
 
   ps_buff$geom_qtr_mi_buff <- sf::st_buffer(sf::st_geometry(ps_buff), buffer_dist_qtr)
-
 
 
   append_eighth <- function(x) stringr::str_c(x, "EIGHTH",  sep = "_")
@@ -291,30 +290,27 @@ make_filters_proximity_play_space <- function(...){
   p_ps_qtr <- sf::st_join(p_pt, ps_buff_qtr)
 
 
-  # ~ 12 min. operation
-
   p_prox_play_eighth <- p_ps_eighth %>%
     sf::st_drop_geometry() %>%
     dplyr::group_by(PIN) %>%
-    tidyr::nest %>%
-    dplyr::mutate(FILTER_PROXIMITY_PLAY_SPACE_EIGHTH = purrr::map_lgl(data, ~ !all(purrr::map_lgl(.x$PLAY_SPACE_OSM_ID_EIGHTH,is.na))),
-           PLAY_SPACE_TYPE_EIGHTH = purrr::map_chr(data, ~ str_count_factor(.x$PLAY_SPACE_TYPE_EIGHTH))) %>%
+    tidyr::nest() %>%
+    dplyr::mutate(FILTER_PROXIMITY_PLAY_SPACE_EIGHTH = purrr::map_lgl(data, ~ !all(sapply(X = .x$PLAY_SPACE_OSM_ID_EIGHTH,FUN = is.na))),
+                  PLAY_SPACE_TYPE_EIGHTH = purrr::map_chr(data, ~ str_count_factor(.x$PLAY_SPACE_TYPE_EIGHTH))) %>%
     dplyr::transmute(PIN,
-              FILTER_PROXIMITY_PLAY_SPACE_EIGHTH,
-              PLAY_SPACE_TYPE_EIGHTH = dplyr::if_else(FILTER_PROXIMITY_PLAY_SPACE_EIGHTH,PLAY_SPACE_TYPE_EIGHTH, NA_character_))
+                     FILTER_PROXIMITY_PLAY_SPACE_EIGHTH,
+                     PLAY_SPACE_TYPE_EIGHTH = dplyr::if_else(FILTER_PROXIMITY_PLAY_SPACE_EIGHTH,PLAY_SPACE_TYPE_EIGHTH, NA_character_))
 
-  # ~ 8 min. operation
   p_prox_play_qtr <- p_ps_qtr %>%
     sf::st_drop_geometry() %>%
     dplyr::group_by(PIN) %>%
-    tidyr::nest %>%
-    dplyr::mutate(FILTER_PROXIMITY_PLAY_SPACE_QTR = purrr::map_lgl(data, ~ !all(purrr::map_lgl(.x$PLAY_SPACE_OSM_ID_QTR,is.na))),
-           PLAY_SPACE_TYPES_QTR = purrr::map_chr(data, ~ str_count_factor(.x$PLAY_SPACE_TYPE_QTR))) %>%
+    tidyr::nest() %>%
+    dplyr::mutate(FILTER_PROXIMITY_PLAY_SPACE_QTR = purrr::map_lgl(data, ~ !all(sapply(X = .x$PLAY_SPACE_OSM_ID_QTR,FUN = is.na))),
+                  PLAY_SPACE_TYPES_QTR = purrr::map_chr(data, ~ str_count_factor(.x$PLAY_SPACE_TYPE_QTR))) %>%
     dplyr::transmute(PIN,
-              FILTER_PROXIMITY_PLAY_SPACE_QTR,
-              PLAY_SPACE_TYPE_QTR = dplyr::if_else(FILTER_PROXIMITY_PLAY_SPACE_QTR,PLAY_SPACE_TYPES_QTR, NA_character_))
+                     FILTER_PROXIMITY_PLAY_SPACE_QTR,
+                     PLAY_SPACE_TYPE_QTR = dplyr::if_else(FILTER_PROXIMITY_PLAY_SPACE_QTR,PLAY_SPACE_TYPES_QTR, NA_character_))
 
-  p_prox_play <- full_join(p_prox_play_eighth, p_prox_play_qtr, by = "PIN") %>%
+  p_prox_play <- dplyr::full_join(p_prox_play_eighth, p_prox_play_qtr, by = "PIN") %>%
     dplyr::mutate(FILTER_PROXIMITY_PLAY_SPACE = dplyr::case_when(
       FILTER_PROXIMITY_PLAY_SPACE_EIGHTH ~ "1/8 mile",
       FILTER_PROXIMITY_PLAY_SPACE_QTR ~ "1/4 mile",
@@ -330,9 +326,9 @@ make_filters_proximity_play_space <- function(...){
 
 #' @rdname filters
 #' @export
-make_filters_proximity_marijuana <- function(...){
+make_filters_proximity_marijuana <- function(parcel_sf_ready, mj_businesses ){
   p_prox_mj <-  parcel_sf_ready %>%
-    sf::st_buffer(dist = set_units(1000, "ft")) %>%
+    sf::st_buffer(dist = units::set_units(1000, "ft")) %>%
     dplyr::transmute(PIN,
               FILTER_PROX_MJ_1000FT = st_intersects_any(.,mj_businesses),
               FILTER_PROX_MJ = dplyr::if_else(FILTER_PROX_MJ_1000FT, "Less than 1000ft", "Greater than 1000ft")) %>%
@@ -346,10 +342,10 @@ make_filters_proximity_marijuana <- function(...){
 
 #' @rdname filters
 #' @export
-make_filters_proximity_el_facilities <- function(...){
+make_filters_proximity_el_facilities <- function(parcel_sf_ready, el_facilities){
 
   p_prox_el <-  parcel_sf_ready %>%
-    sf::st_buffer(dist = set_units(500, "ft")) %>%
+    sf::st_buffer(dist = units::set_units(500, "ft")) %>%
     dplyr::transmute(PIN,
               FILTER_PROX_EL_FACILITIES_500FT = st_intersects_any(., el_facilities),
               FILTER_PROX_EL_FACILITIES = dplyr::if_else(FILTER_PROX_EL_FACILITIES_500FT, "Less than 500ft", "Greater than 500ft")) %>%
@@ -372,8 +368,8 @@ make_filters_proximity_affordable_housing <- function(parcel_sf_ready, affordabl
     sf::st_transform(2926) %>%
     dplyr::transmute(PIN)
 
-  buffer_dist_qtr <- set_units(1/4, "mile")
-  buffer_dist_half <- set_units(1/2, "mile")
+  buffer_dist_qtr <- units::set_units(1/4, "mile")
+  buffer_dist_half <- units::set_units(1/2, "mile")
 
   ah_buff <- affordable_housing_properties %>%
     sf::st_transform(2926)
@@ -414,8 +410,8 @@ make_filters_proximity_affordable_housing <- function(parcel_sf_ready, affordabl
   p_prox_afford_qtr <- p_ah_qtr %>%
     sf::st_drop_geometry() %>%
     dplyr::group_by(PIN) %>%
-    tidyr::nest %>%
-    dplyr::mutate(FILTER_PROXIMITY_AFFORDABLE_HOUSING_QTR = purrr::map_lgl(data, ~ !all(purrr::map_lgl(.x$PROPERTY_NAME_QTR,is.na))),
+    tidyr::nest() %>%
+    dplyr::mutate(FILTER_PROXIMITY_AFFORDABLE_HOUSING_QTR = purrr::map_lgl(data, ~ !all(sapply(X = .x$PROPERTY_NAME_QTR, FUN = is.na))),
            AFFORDABLE_HOUSING_TYPES_QTR = purrr::map_chr(data, ~ str_count_factor(.x$TARGET_TENANT_TYPE_QTR))) %>%
     dplyr::transmute(PIN,
               FILTER_PROXIMITY_AFFORDABLE_HOUSING_QTR,
@@ -427,15 +423,15 @@ make_filters_proximity_affordable_housing <- function(parcel_sf_ready, affordabl
   p_prox_afford_half <- p_ah_half %>%
     sf::st_drop_geometry() %>%
     dplyr::group_by(PIN) %>%
-    tidyr::nest %>%
-    dplyr::mutate(FILTER_PROXIMITY_AFFORDABLE_HOUSING_HALF = purrr::map_lgl(data, ~ !all(purrr::map_lgl(.x$PROPERTY_NAME_HALF,is.na))),
+    tidyr::nest() %>%
+    dplyr::mutate(FILTER_PROXIMITY_AFFORDABLE_HOUSING_HALF = purrr::map_lgl(data, ~ !all(sapply(X = .x$PROPERTY_NAME_HALF, FUN = is.na))),
            AFFORDABLE_HOUSING_TYPE_HALF = purrr::map_chr(data, ~ str_count_factor(.x$TARGET_TENANT_TYPE_HALF))) %>%
     dplyr::transmute(PIN,
               FILTER_PROXIMITY_AFFORDABLE_HOUSING_HALF,
               AFFORDABLE_HOUSING_TYPE_HALF = dplyr::if_else(FILTER_PROXIMITY_AFFORDABLE_HOUSING_HALF,AFFORDABLE_HOUSING_TYPE_HALF, NA_character_))
 
 
-  p_prox_afford <- full_join(p_prox_afford_qtr, p_prox_afford_half, by = "PIN") %>%
+  p_prox_afford <- dplyr::full_join(p_prox_afford_qtr, p_prox_afford_half, by = "PIN") %>%
     dplyr::mutate(FILTER_PROXIMITY_AFFORDABLE_HOUSING = dplyr::case_when(
       FILTER_PROXIMITY_AFFORDABLE_HOUSING_QTR ~ "1/4 mile",
       FILTER_PROXIMITY_AFFORDABLE_HOUSING_HALF ~ "1/2 mile",
@@ -451,25 +447,7 @@ make_filters_proximity_affordable_housing <- function(parcel_sf_ready, affordabl
 
 #' @rdname filters
 #' @export
-make_filters_potential_units <- function(parcel_ready){
-
-  # THIS IS DUMMY DATA + SHOULD BE REPLACED
-
-  p_ready_pu<- parcel_ready %>%
-    sf::st_drop_geometry() %>%
-    dplyr::transmute(PIN,
-              FILTER_POTENTIAL_UNITS = integer_dummy(n(),10,5)
-    )
-
-  filters_potential_units <- p_ready_pu
-
-  return(filters_potential_units)
-
-}
-
-#' @rdname filters
-#' @export
-make_filters_leg_district <- function(...){
+make_filters_leg_district <- function(parcel_sf_ready, leg_districts){
 
   p_pt <- parcel_sf_ready %>%
     sf::st_set_geometry("geom_pt") %>%
@@ -492,26 +470,25 @@ make_filters_leg_district <- function(...){
 
   outside_pins <- p_leg %>%
     dplyr::filter(is.na(FILTER_LEGISLATIVE_DISTRICT)) %>%
-    pluck("PIN")
+    purrr::pluck("PIN")
 
   p_outside <- dplyr::filter(p_pt, PIN %in% outside_pins)
 
   leg_buff_2000 <- sf::st_buffer(leg, dist = 2000)
 
-  p_outside$FILTER_LEGISLATIVE_DISTRICT_OUTSIDE <- st_over(p_outside, leg_buff_2000,"LEGISLATIVE_DISTRICT") %>%
-    sf::st_drop_geometry()
+  p_outside$FILTER_LEGISLATIVE_DISTRICT_OUTSIDE <- st_over(p_outside, leg_buff_2000,"LEGISLATIVE_DISTRICT")
 
   # Merge together
 
   p_leg_ready <- sf::st_drop_geometry(p_leg) %>%
     dplyr::left_join(sf::st_drop_geometry(p_outside), by = "PIN") %>%
-    arrange(FILTER_LEGISLATIVE_DISTRICT_OUTSIDE) %>%
+    dplyr::arrange(FILTER_LEGISLATIVE_DISTRICT_OUTSIDE) %>%
     dplyr::transmute(PIN,
-              FILTER_LEGISLATIVE_DISTRICT = dplyr::case_when(
-                !is.na(FILTER_LEGISLATIVE_DISTRICT_OUTSIDE) ~ FILTER_LEGISLATIVE_DISTRICT_OUTSIDE,
-                !is.na(FILTER_LEGISLATIVE_DISTRICT) ~ FILTER_LEGISLATIVE_DISTRICT,
-                TRUE ~ "Outside King County"
-              ))
+                     FILTER_LEGISLATIVE_DISTRICT = dplyr::case_when(
+                       !is.na(FILTER_LEGISLATIVE_DISTRICT_OUTSIDE) ~ FILTER_LEGISLATIVE_DISTRICT_OUTSIDE,
+                       !is.na(FILTER_LEGISLATIVE_DISTRICT) ~ FILTER_LEGISLATIVE_DISTRICT,
+                       TRUE ~ "Outside King County"
+                     ))
 
   leg_district <- p_leg_ready
 
@@ -521,7 +498,7 @@ make_filters_leg_district <- function(...){
 
 #' @rdname filters
 #' @export
-make_filters_kc_council_district <- function(...){
+make_filters_kc_council_district <- function(parcel_sf_ready, kc_council_districts){
 
   p_pt <- parcel_sf_ready %>%
     sf::st_set_geometry("geom_pt") %>%
@@ -534,9 +511,9 @@ make_filters_kc_council_district <- function(...){
     sf::st_transform(2926)
 
   kcc_members <- kcc %>%
-    sf::st_drop_geometry %>%
+    sf::st_drop_geometry() %>%
     dplyr::select(KC_COUNCIL_DISTRICT,KC_COUNCIL_MEMBER) %>%
-    distinct()
+    dplyr::distinct()
 
   kcc_subd <- kcc %>%
     lwgeom::st_subdivide(max_vertices = 100) %>%
@@ -550,20 +527,19 @@ make_filters_kc_council_district <- function(...){
 
   outside_pins <- p_kcc %>%
     dplyr::filter(is.na(FILTER_KC_COUNCIL_DISTRICT)) %>%
-    pluck("PIN")
+    purrr::pluck("PIN")
 
   p_outside <- dplyr::filter(p_pt, PIN %in% outside_pins)
 
   kcc_buff_2000 <- sf::st_buffer(kcc, dist = 2000)
 
-  p_outside$FILTER_KC_COUNCIL_DISTRICT_OUTSIDE <- st_over(p_outside, kcc_buff_2000,"KC_COUNCIL_DISTRICT") %>%
-    sf::st_drop_geometry()
+  p_outside$FILTER_KC_COUNCIL_DISTRICT_OUTSIDE <- st_over(p_outside, kcc_buff_2000,"KC_COUNCIL_DISTRICT")
 
   # Merge together
 
   p_kcc_ready <- sf::st_drop_geometry(p_kcc) %>%
     dplyr::left_join(sf::st_drop_geometry(p_outside), by = "PIN") %>%
-    arrange(FILTER_KC_COUNCIL_DISTRICT_OUTSIDE) %>%
+    dplyr::arrange(FILTER_KC_COUNCIL_DISTRICT_OUTSIDE) %>%
     dplyr::transmute(PIN,
               FILTER_KC_COUNCIL_DISTRICT = dplyr::case_when(
                 !is.na(FILTER_KC_COUNCIL_DISTRICT_OUTSIDE) ~ FILTER_KC_COUNCIL_DISTRICT_OUTSIDE,
@@ -580,7 +556,7 @@ make_filters_kc_council_district <- function(...){
 
 #' @rdname filters
 #' @export
-make_filters_seattle_council_district <- function(...){
+make_filters_seattle_council_district <- function(parcel_sf_ready, seattle_council_districts){
 
   p_pt <- parcel_sf_ready %>%
     sf::st_set_geometry("geom_pt") %>%
@@ -607,7 +583,7 @@ make_filters_seattle_council_district <- function(...){
 
 #' @rdname filters
 #' @export
-make_filters_school_district <- function(...){
+make_filters_school_district <- function(parcel_sf_ready, school_districts){
 
   p_pt <- parcel_sf_ready %>%
     sf::st_set_geometry("geom_pt") %>%
@@ -662,12 +638,13 @@ make_filters_afford_expir_date <- function(parcel_sf_ready, affordable_housing_s
                 TRUE ~ SUBSIDY_NAME
               ),
               FILTER_AFFORD_UNITS = ASSISTED_UNITS,
-              FILTER_AFFORD_EXPIR_DATE = as.Date(END_DATE)
+              FILTER_AFFORD_EXPIR_DATE = END_DATE,
+              FILTER_AFFORD_EXPIR_YEAR = lubridate::year(END_DATE)
     ) %>%
     dplyr::group_by(PIN) %>%
-    arrange(FILTER_AFFORD_EXPIR_DATE) %>%
-    slice(1) %>%
-    ungroup
+    dplyr::arrange(FILTER_AFFORD_EXPIR_DATE) %>%
+    dplyr::slice(1) %>%
+    dplyr::ungroup()
 
   filters_afford_expir_date <- p_ready_afford_expir_date
 
@@ -677,41 +654,19 @@ make_filters_afford_expir_date <- function(parcel_sf_ready, affordable_housing_s
 
 #' @rdname filters
 #' @export
-make_filters_eligibility_nmtc <- function(filters_census_tract){
+make_filters_eligibility_nmtc <- function(filters_census_tract, nmtc){
 
-  elig_nmtc_fp <- here("1-data/2-external/NMTC-2011-2015-LIC-Nov2-2017-4pm.xlsx")
-
-  elig_nmtc_dr_id <- as_id("1gM7oRPZTEDM4N7Xhcmih8R4WFTxLj8rK")
-
-  elig_nmtc_load <-
-    make_or_read2(fp = elig_nmtc_fp,
-                  dr_id = elig_nmtc_dr_id,
-                  skip_get_expr = FALSE,
-                  get_expr = function(fp){
-                    # SOURCE: https://www.cdfifund.gov/Documents/NMTC%202011-2015%20LIC%20Nov2-2017-4pm.xlsx
-                  },
-                  make_expr = function(fp, dr_id){
-                    drive_read(dr_id = dr_id,  path = fp, read_fun = read_xlsx,.tempfile = FALSE)
-                  },
-                  read_expr = function(fp){read_xlsx(fp)})
-
-  elig_nmtc <- elig_nmtc_load %>%
-    clean_names() %>%
-    dplyr::rename_all(to_screaming_snake_case) %>%
-    dplyr::transmute(FILTER_CENSUS_TRACT = X_2010_CENSUS_TRACT_NUMBER_FIPS_CODE_GEOID,
-              NMTC = DOES_CENSUS_TRACT_QUALIFY_FOR_NMTC_LOW_INCOME_COMMUNITY_LIC_ON_POVERTY_OR_INCOME_CRITERIA,
-              FILTER_ELIGIBILITY_NMTC = dplyr::if_else(NMTC %in% "Yes",TRUE,FALSE, missing = FALSE)
+  elig_nmtc <- nmtc %>%
+    dplyr::transmute(FILTER_CENSUS_TRACT = X2010_CENSUS_TRACT_NUMBER_FIPS_CODE_GEOID,
+              FILTER_ELIGIBILITY_NMTC = DOES_CENSUS_TRACT_QUALIFY_FOR_NMTC_LOW_INCOME_COMMUNITY_LIC_ON_POVERTY_OR_INCOME_CRITERIA
     )
 
 
-  p_ready_eligibility_nmtc <- filters_census_tract %>%
-    sf::st_drop_geometry() %>%
+  filters_eligibility_nmtc <- filters_census_tract %>%
     dplyr::select(PIN, FILTER_CENSUS_TRACT) %>%
     dplyr::left_join(elig_nmtc, by = "FILTER_CENSUS_TRACT") %>%
     dplyr::transmute(PIN,
               FILTER_ELIGIBILITY_NMTC = dplyr::if_else(FILTER_ELIGIBILITY_NMTC, TRUE, FALSE, missing = FALSE))
-
-  filters_eligibility_nmtc <- p_ready_eligibility_nmtc
 
   return(filters_eligibility_nmtc)
 
@@ -719,93 +674,41 @@ make_filters_eligibility_nmtc <- function(filters_census_tract){
 
 #' @rdname filters
 #' @export
-make_filters_eligibility_dda <- function(filters_zcta){
+make_filters_eligibility_dda <- function(filters_zcta, dda){
 
-  elig_dda_fp <- here("1-data/2-external/DDA2018M.PDF")
-
-  elig_dda_dr_id <- as_id("1KbD_gAHy_0DTTxHZgTbL96VOviTwdNRZ")
-
-  make_or_read2(fp = elig_dda_fp,
-                dr_id = elig_dda_dr_id,
-                skip_get_expr = TRUE,
-                get_expr = function(fp){
-                  # SOURCE:  https://www.huduser.gov/portal/Datasets/qct/DDA2018M.PDF
-                },
-                make_expr = function(fp, dr_id){
-
-                  drive_download(dr_id, path = fp)
-
-                },
-                read_expr = function(fp){
-                  message(glue("* Note: This file is not actually read but it does exists here: '{fp}'."))
-                })
-
-  list_pages <- extract_tables(elig_dda_fp, output = "data.frame")
-
-  tbl_pages <- list_pages %>%
-    map(~ .x %>% t %>% as_tibble) %>%
-    reduce(bind_cols) %>%
-    dplyr::mutate_all(funs(empty_as_na))
-
-  zcta_dda <- tbl_pages %>%
-    slice(3:14) %>%
-    gather(OLD_COL,ZCTA) %>%
-    drop_na() %>%
-    dplyr::transmute(FILTER_ZCTA = str_replace(ZCTA,"\\*",""),
-              FILTER_ELIGIBILITY_DDA = TRUE)
-
-  elig_dda <- filters_zcta %>%
-    dplyr::left_join(zcta_dda, by = "FILTER_ZCTA") %>%
+ filters_eligibility_dda <- filters_zcta %>%
+    dplyr::left_join(dda, by = "FILTER_ZCTA") %>%
     dplyr::transmute(PIN,
               FILTER_ELIGIBILITY_DDA = dplyr::if_else(FILTER_ELIGIBILITY_DDA,TRUE,FALSE, missing = FALSE))
-
-  filters_eligibility_dda <- elig_dda
 
   return(filters_eligibility_dda)
 }
 
+# don't export
+view_dda_zcta <- function(){
+  loadd(zcta, dda)
+
+  left_join(zcta, dda, by = c(ZCTA_5_CE_10 = "FILTER_ZCTA")) %>%
+    dplyr::mutate(DDA_LGL = dplyr::if_else(FILTER_ELIGIBILITY_DDA,TRUE,FALSE, missing = FALSE)) %>%
+    mapview::mapview(zcol = "DDA_LGL")
+
+}
+
+
 #' @rdname filters
 #' @export
-make_filters_eligibility_qct <- function(filters_census_tract){
+make_filters_eligibility_qct <- function(filters_census_tract, qct){
 
-  elig_qtc_fp <- here("1-data/2-external/QCT2018.DBF")
-
-  elig_qtc_dr_id <- as_id("1JU0MQKta1mQurT89DJtk8nFvYcgxP4qk")
-
-  elig_qtc_load <-
-    make_or_read2(fp = elig_qtc_fp,
-                  dr_id = elig_qtc_dr_id,
-                  skip_get_expr = FALSE,
-                  get_expr = function(fp){
-                    # SOURCE:  https://www.huduser.gov/portal/datasets/qct/QCT2018dbf.zip
-                  },
-                  make_expr = function(fp, dr_id){
-
-                    target_name <- "QCT2018.DBF"
-
-                    dir_path <- here("1-data/2-external/")
-
-                    drive_read_zip(dr_id = dr_id,
-                                   .tempdir = FALSE,
-                                   dir_path = dir_path,
-                                   read_fun = foreign::read.dbf,
-                                   target_name = target_name)
-                  },
-                  read_expr = function(fp){foreign::read.dbf(fp)})
-
-  elig_qtc <- elig_qtc_load %>%
+ elig_qtc <- qct %>%
     dplyr::transmute(FILTER_CENSUS_TRACT = as.character(FIPS),
               FILTER_ELIGIBILITY_QCT = TRUE)
 
 
-  p_ready_eligibility_qct <- filters_census_tract %>%
-    sf::st_drop_geometry() %>%
+filters_eligibility_qct <- filters_census_tract %>%
     dplyr::select(PIN, FILTER_CENSUS_TRACT) %>%
     dplyr::left_join(elig_qtc, by = "FILTER_CENSUS_TRACT") %>%
     dplyr::transmute(PIN,
               FILTER_ELIGIBILITY_QCT = dplyr::if_else(FILTER_ELIGIBILITY_QCT, TRUE, FALSE, missing = FALSE))
-
-  filters_eligibility_qct <- p_ready_eligibility_qct
 
   return(filters_eligibility_qct)
 
@@ -813,37 +716,18 @@ make_filters_eligibility_qct <- function(filters_census_tract){
 
 #' @rdname filters
 #' @export
-make_filters_eligibility_oz <- function(filters_census_tract){
+make_filters_eligibility_oz <- function(filters_census_tract, oz){
 
-  elig_oz_fp <- here("1-data/3-interim/KC-Opportunity-Zones-2018.xlsx")
 
-  elig_oz_dr_id <- as_id("1-xCiQoCCO1esgmUUdlVt6Wlm-HLN4ONw0lUwrBYoXZA")
-
-  elig_oz_load <-
-    make_or_read2(fp = elig_oz_fp,
-                  dr_id = elig_oz_dr_id,
-                  skip_get_expr = FALSE,
-                  get_expr = function(fp){
-                    # SOURCE:  http://www.commerce.wa.gov/growing-the-economy/opportunity-zones/
-                  },
-                  make_expr = function(fp, dr_id){
-                    drive_read(dr_id = elig_oz_dr_id, .tempfile = FALSE, path = fp, read_fun = read_excel)
-                  },
-                  read_expr = function(fp){
-                    read_excel(fp)
-                  })
-
-  elig_oz <- elig_oz_load %>%
-    dplyr::transmute(FILTER_CENSUS_TRACT = as.character(GEOID),
+  elig_oz <- oz %>%
+    dplyr::transmute(FILTER_CENSUS_TRACT = TRACT,
               FILTER_ELIGIBILITY_OZ = TRUE)
 
 
-  p_ready_eligibility_oz <- filters_census_tract %>%
+  filters_eligibility_oz <- filters_census_tract %>%
     dplyr::left_join(elig_oz, by = "FILTER_CENSUS_TRACT") %>%
     dplyr::transmute(PIN,
               FILTER_ELIGIBILITY_OZ = dplyr::if_else(FILTER_ELIGIBILITY_OZ, TRUE, FALSE, missing = FALSE))
-
-  filters_eligibility_oz <- p_ready_eligibility_oz
 
   return(filters_eligibility_oz)
 
@@ -873,53 +757,53 @@ make_filters_parking <- function(parcel_df_ready){
 make_filters_proximity_lightrail <- function(parcel_sf_ready, future_lightrail){
 
   p_pt <- parcel_sf_ready %>%
-    sf::st_set_geometry("geom_pt") %>%
-    sf::st_transform(2926) %>%
-    dplyr::transmute(PIN)
+  sf::st_set_geometry("geom_pt") %>%
+  sf::st_transform(2926) %>%
+  dplyr::transmute(PIN)
 
-  flr <- future_lightrail %>%
-    dplyr::filter(!stringr::str_detect(LOCATION_CERTAINTY,"exists")) %>%
-    dplyr::transmute(PROJECT,
-              NAME,
-              LOCATION_STATUS = dplyr::case_when(
-                stringr::str_detect(LOCATION_CERTAINTY, "high") ~ "confirmed",
-                stringr::str_detect(LOCATION_CERTAINTY, "low") ~ "unconfirmed",
-                TRUE ~ "other"
-              )) %>%
-    sf::st_transform(2926)
+flr <- future_lightrail %>%
+  dplyr::filter(!stringr::str_detect(LOCATION_CERTAINTY,"exists")) %>%
+  dplyr::transmute(PROJECT,
+                   NAME,
+                   LOCATION_STATUS = dplyr::case_when(
+                     stringr::str_detect(LOCATION_CERTAINTY, "high") ~ "confirmed",
+                     stringr::str_detect(LOCATION_CERTAINTY, "low") ~ "unconfirmed",
+                     TRUE ~ "other"
+                   )) %>%
+  sf::st_transform(2926)
 
 
-  buffer_dist_half <- set_units(1/2, "mile")
+buffer_dist_half <- units::set_units(1/2, "mile")
 
-  p_flr <- sf::st_join(p_pt, sf::st_buffer(flr, buffer_dist_half))
+p_flr <- sf::st_join(p_pt, sf::st_buffer(flr, buffer_dist_half))
 
-  # ~ 10 min. operation
+# ~ 8 min. operation
 
-  p_prox_flr <- p_flr %>%
-    sf::st_drop_geometry() %>%
-    dplyr::group_by(PIN) %>%
-    tidyr::nest %>%
-    dplyr::mutate(TYPES = map(data, "LOCATION_STATUS")) %>%
-    dplyr::group_by(PIN) %>%
-    dplyr::transmute( FILTER_PROXIMITY_FUTURE_LIGHTRAIL = dplyr::case_when(
-      any(flatten_chr(TYPES) %in% "confirmed") ~ "1/2 mile (confirmed station)",
-      any(flatten_chr(TYPES) %in% "unconfirmed") ~ "1/2 mile (unconfirmed station)",
-      TRUE ~ "Greater than 1/2 mile"),
-      FILTER_PROXIMITY_FUTURE_LIGHTRAIL_HALF = dplyr::case_when(
-        FILTER_PROXIMITY_FUTURE_LIGHTRAIL %in% "Greater than 1/2 mile" ~ FALSE,
-        TRUE ~ TRUE
-      ),
-      FUTURE_LIGHTRAIL_STATION_TYPES = purrr::map_chr(data, ~ str_count_factor(.x$LOCATION_STATUS)),
-      FUTURE_LIGHTRAIL_STATION_NAMES = purrr::map_chr(data, ~ stringr::str_c(.x$NAME, collapse = ", "))
-    ) %>%
-    ungroup %>%
-    dplyr::select(PIN,
-           FILTER_PROXIMITY_FUTURE_LIGHTRAIL_HALF,
-           FUTURE_LIGHTRAIL_STATION_TYPES,
-           FUTURE_LIGHTRAIL_STATION_NAMES,
-           FILTER_PROXIMITY_FUTURE_LIGHTRAIL)
+p_prox_flr <- p_flr %>%
+  sf::st_drop_geometry() %>%
+  dplyr::group_by(PIN) %>%
+  tidyr::nest() %>%
+  dplyr::mutate(TYPES = purrr::map(data, "LOCATION_STATUS")) %>%
+  dplyr::group_by(PIN) %>%
+  dplyr::transmute( FILTER_PROXIMITY_FUTURE_LIGHTRAIL = dplyr::case_when(
+    any(unlist(TYPES) %in% "confirmed") ~ "1/2 mile (confirmed station)",
+    any(unlist(TYPES) %in% "unconfirmed") ~ "1/2 mile (unconfirmed station)",
+    TRUE ~ "Greater than 1/2 mile"),
+    FILTER_PROXIMITY_FUTURE_LIGHTRAIL_HALF = dplyr::case_when(
+      FILTER_PROXIMITY_FUTURE_LIGHTRAIL %in% "Greater than 1/2 mile" ~ FALSE,
+      TRUE ~ TRUE
+    ),
+    FUTURE_LIGHTRAIL_STATION_TYPES = purrr::map_chr(data, ~ str_count_factor(.x$LOCATION_STATUS)),
+    FUTURE_LIGHTRAIL_STATION_NAMES = purrr::map_chr(data, ~ stringr::str_c(.x$NAME, collapse = ", "))
+  ) %>%
+  dplyr::ungroup()  %>%
+  dplyr::select(PIN,
+                FILTER_PROXIMITY_FUTURE_LIGHTRAIL_HALF,
+                FUTURE_LIGHTRAIL_STATION_TYPES,
+                FUTURE_LIGHTRAIL_STATION_NAMES,
+                FILTER_PROXIMITY_FUTURE_LIGHTRAIL)
 
-  filters_proximity_transit <- p_prox_flr
+filters_proximity_transit <- p_prox_flr
 
   return(filters_proximity_transit)
 
@@ -931,21 +815,15 @@ make_filters_brownfield <- function(parcel_sf_ready, brownfield_sites){
 
   brownfield_ready <- brownfield_sites %>%
     dplyr::transmute(FILTER_BROWNFIELD = TRUE,
-              FILTER_BROWNFIELD_NAME = str_trim(CLEANUP_SITE_NAME),
-              FILTER_BROWNFIELD_STATUS = str_to_lower(ECOLOGY_STATUS),
-              FILTER_BROWNFIELD_TYPE = str_to_lower(CONTAMINANT_TYPE)) %>%
+              FILTER_BROWNFIELD_NAME = stringr::str_trim(SITE_NAME),
+              FILTER_BROWNFIELD_STATUS = stringr::str_to_lower(SITE_STATUS),
+              FILTER_BROWNFIELD_TYPE = stringr::str_to_lower(CONTAMINANT_NAME)) %>%
     sf::st_transform(2926)
 
-  # note: as of 2018-07-11 there are no brownfield sites in King County,
-  # so this join doesn't actually result in any data from RHS being joined to LHS
-
-  p_ready_brownfield <- parcel_sf_ready %>%
+  filters_brownfield <- parcel_sf_ready %>%
     sf::st_join(brownfield_ready) %>%
     sf::st_drop_geometry() %>%
     dplyr::select_if(not_sfc)
-
-
-  filters_brownfield <- p_ready_brownfield
 
   return(filters_brownfield)
 
@@ -956,7 +834,14 @@ make_filters_brownfield <- function(parcel_sf_ready, brownfield_sites){
 make_filters_contaminated <- function(parcel_sf_ready, contaminated_sites){
 
   contaminated_ready <- sf::st_transform(contaminated_sites, 2926) %>%
-    sf::st_buffer(set_units(10, "feet"))
+    sf::st_buffer(units::set_units(10, "feet")) %>%
+    dplyr::transmute(CLEANUP_SITE_ID,
+                     FILTER_CONTAMINATED = TRUE,
+                     FILTER_CONTAMINATED_NAME = stringr::str_to_title(SITE_NAME),
+                     FILTER_CONTAMINATED_STATUS = stringr::str_to_lower(SITE_STATUS),
+                     FILTER_CONTAMINATED_TYPE = CONTAMINANT_NAME,
+                     FILTER_CONTAMINATED_MEDIA = CONTAMINATED_MEDIA
+                     )
 
   p_ready_contaminated <- parcel_sf_ready %>%
     sf::st_join(contaminated_ready) %>%

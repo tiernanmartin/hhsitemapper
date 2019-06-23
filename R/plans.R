@@ -128,7 +128,15 @@ get_data_source_plan <- function(){
     official_names_hospitals_prep_status = target(command = prepare_official_names_hospitals(path = file_out("extdata/source/official_names_hospitals.csv")),
                                                   trigger = trigger(mode = "blacklist", condition = FALSE)),
     development_assumptions_zoning_prep_status = target(command = prepare_development_assumptions_zoning(path = file_out("extdata/source/development_assumptions_zoning.csv")),
-                                                        trigger = trigger(mode = "blacklist", condition = FALSE))
+                                                        trigger = trigger(mode = "blacklist", condition = FALSE)),
+    nmtc_prep_status = target(command = prepare_nmtc(path = file_out("extdata/source/NMTC-2011-2015-LIC-Nov2-2017-4pm.xlsx")),
+                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    dda_prep_status = target(command = prepare_dda(path = file_out("extdata/source/DDA2019M.PDF")),
+                             trigger = trigger(mode = "blacklist", condition = FALSE)),
+    qct_prep_status = target(command = prepare_qct(path = file_out("extdata/source/QCT2019dbf.zip")),
+                             trigger = trigger(mode = "blacklist", condition = FALSE)),
+    oz_prep_status = target(command = prepare_oz(path = file_out("extdata/source/Designated_QOZs_12-14-18.xlsx")),
+                            trigger = trigger(mode = "blacklist", condition = FALSE))
   )
 
   upload_plan <- drake_plan(
@@ -384,7 +392,31 @@ get_data_source_plan <- function(){
                                                                                file_id = "ynhd6",
                                                                                path = file_in("extdata/source/development_assumptions_zoning.csv"),
                                                                                osf_dirpath = "data/raw-data"),
-                                                          trigger = trigger(mode = "blacklist", condition = FALSE))
+                                                          trigger = trigger(mode = "blacklist", condition = FALSE)),
+    nmtc_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                     project_id = "pvu6f",
+                                                     file_id = "e9kyw",
+                                                     path = file_in("extdata/source/NMTC-2011-2015-LIC-Nov2-2017-4pm.xlsx"),
+                                                     osf_dirpath = "data/raw-data"),
+                                trigger = trigger(mode = "blacklist", condition = FALSE)),
+    dda_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                    project_id = "pvu6f",
+                                                    file_id = "vn5dj",
+                                                    path = file_in("extdata/source/DDA2019M.PDF"),
+                                                    osf_dirpath = "data/raw-data"),
+                               trigger = trigger(mode = "blacklist", condition = FALSE)),
+    qct_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                    project_id = "pvu6f",
+                                                    file_id = "az49w",
+                                                    path = file_in("extdata/source/QCT2019dbf.zip"),
+                                                    osf_dirpath = "data/raw-data"),
+                               trigger = trigger(mode = "blacklist", condition = FALSE)),
+    oz_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                   project_id = "pvu6f",
+                                                   file_id = "4gxr9",
+                                                   path = file_in("extdata/source/Designated_QOZs_12-14-18.xlsx"),
+                                                   osf_dirpath = "data/raw-data"),
+                              trigger = trigger(mode = "blacklist", condition = FALSE))
 
   )
 
@@ -502,7 +534,15 @@ get_data_cache_plan <- function(){
     official_names_hospitals_filepath = target(command = osf_download_file(osf_id = "mcrb4", path = file_out("extdata/osf/official_names_hospitals.csv")),
                                                trigger = trigger(change = osf_get_file_version(osf_id = "mcrb4"))),
     development_assumptions_zoning_filepath = target(command = osf_download_file(osf_id = "ynhd6", path = file_out("extdata/osf/development_assumptions_zoning.csv")),
-                                                     trigger = trigger(change = osf_get_file_version(osf_id = "ynhd6")))
+                                                     trigger = trigger(change = osf_get_file_version(osf_id = "ynhd6"))),
+    nmtc_filepath = target(command = osf_download_file(osf_id = "e9kyw", path = file_out("extdata/osf/NMTC-2011-2015-LIC-Nov2-2017-4pm.xlsx")),
+                           trigger = trigger(change = osf_get_file_version(osf_id = "e9kyw"))),
+    dda_filepath = target(command = osf_download_file(osf_id = "vn5dj", path = file_out("extdata/osf/DDA2019M.PDF")),
+                          trigger = trigger(change = osf_get_file_version(osf_id = "vn5dj"))),
+    qct_filepath = target(command = osf_download_file(osf_id = "az49w", path = file_out("extdata/osf/QCT2019dbf.zip")),
+                          trigger = trigger(change = osf_get_file_version(osf_id = "az49w"))),
+    oz_filepath = target(command = osf_download_file(osf_id = "4gxr9", path = file_out("extdata/osf/Designated_QOZs_12-14-18.xlsx")),
+                         trigger = trigger(change = osf_get_file_version(osf_id = "4gxr9")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -553,6 +593,7 @@ get_data_cache_plan <- function(){
     other_suitability_characteristics = make_other_suitability_characteristics(path = file_in("extdata/osf/other_suitability_characteristics.rda")),
     seattle_dev_cap = make_seattle_dev_cap(path = file_in("extdata/osf/seattle_dev_cap.csv")),
     affordable_housing_properties = make_affordable_housing_properties(path = file_in("extdata/osf/NHPD Properties Only Export.xlsx")),
+    affordable_housing_subsidies = make_affordable_housing_subsidies(path = "extdata/source/All Subsidies.xlsx",zcta),
     future_lightrail = make_future_lightrail(path = file_in("extdata/osf/future_lightrail.gpkg")),
     brownfield_sites = make_brownfield_sites(path = file_in("extdata/osf/brownfield_sites.csv")),
     contaminated_sites = make_contaminated_sites(path = file_in("extdata/osf/contaminated_sites.csv")),
@@ -568,7 +609,11 @@ get_data_cache_plan <- function(){
     official_names_school_districts = make_official_names_school_districts(official_names_special_purpose_districts),
     official_names_higher_ed_providers = make_official_names_higher_ed_providers(path = file_in("extdata/osf/official_names_higher_ed_providers.csv")),
     official_names_hospitals = make_official_names_hospitals(path = file_in("extdata/osf/official_names_hospitals.csv")),
-    development_assumptions_zoning = make_development_assumptions_zoning(path = file_in("extdata/osf/development_assumptions_zoning.csv"))
+    development_assumptions_zoning = make_development_assumptions_zoning(path = file_in("extdata/osf/development_assumptions_zoning.csv")),
+    nmtc = make_nmtc(path = file_in("extdata/osf/NMTC-2011-2015-LIC-Nov2-2017-4pm.xlsx")),
+    dda = make_dda(path = file_in("extdata/osf/DDA2019M.PDF")),
+    qct = make_qct(path = file_in("extdata/osf/QCT2019dbf.zip")),
+    oz = make_oz(path = file_in("extdata/osf/Designated_QOZs_12-14-18.xlsx"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)
@@ -771,10 +816,52 @@ get_filter_plan <- function(parcel_sf_ready, census_tracts){
     filters_public_owner = make_filters_public_owner(owner_category),
     filters_zoning_category = make_filters_zoning_category(suitability_developable_zoning),
     filters_proximity_transit = make_filters_proximity_transit(parcel_sf_ready, transit_stops_osm),
+    filters_proximity_play_space = make_filters_proximity_play_space(parcel_sf_ready, play_spaces_osm),
+    filters_proximity_marijuana = make_filters_proximity_marijuana(parcel_sf_ready, mj_businesses),
+    filters_proximity_el_facilities = make_filters_proximity_el_facilities(parcel_sf_ready, el_facilities),
+    filters_proximity_affordable_housing = make_filters_proximity_affordable_housing(parcel_sf_ready, affordable_housing_properties),
+    filters_leg_district = make_filters_leg_district(parcel_sf_ready, leg_districts),
+    filters_kc_council_district = make_filters_kc_council_district(parcel_sf_ready, kc_council_districts),
+    filters_seattle_council_district = make_filters_seattle_council_district(parcel_sf_ready, seattle_council_districts),
+    filters_school_district = make_filters_school_district(parcel_sf_ready, school_districts),
+    filters_historic = make_filters_historic(parcel_ready),
+    filters_afford_expir_date = make_filters_afford_expir_date(parcel_sf_ready, affordable_housing_subsidies),
+    filters_eligibility_nmtc = make_filters_eligibility_nmtc(filters_census_tract, nmtc),
+    filters_eligibility_dda = make_filters_eligibility_dda(filters_zcta, dda),
+    filters_eligibility_qct = make_filters_eligibility_qct(filters_census_tract, qct),
+    filters_eligibility_oz = make_filters_eligibility_oz(filters_census_tract, oz),
+    filters_parking = make_filters_parking(parcel_df_ready),
+    filters_proximity_lightrail = make_filters_proximity_lightrail(parcel_sf_ready, future_lightrail),
+    filters_brownfield = make_filters_brownfield(parcel_sf_ready, brownfield_sites),
+    filters_contaminated = make_filters_contaminated(parcel_sf_ready, contaminated_sites),
     filters = make_filters(parcel_ready,
-                           filter_list = list(filters_census_tract))
+                           filter_list = list(filters_census_tract,
+                                              filters_zcta,
+                                              filters_place,
+                                              filters_place_name,
+                                              filters_owner_category,
+                                              filters_public_owner,
+                                              filters_zoning_category,
+                                              filters_proximity_transit,
+                                              filters_proximity_play_space,
+                                              filters_proximity_marijuana,
+                                              filters_proximity_el_facilities,
+                                              filters_proximity_affordable_housing,
+                                              filters_leg_district,
+                                              filters_kc_council_district,
+                                              filters_seattle_council_district,
+                                              filters_school_district,
+                                              filters_historic,
+                                              filters_afford_expir_date,
+                                              filters_eligibility_nmtc,
+                                              filters_eligibility_dda,
+                                              filters_eligibility_qct,
+                                              filters_eligibility_oz,
+                                              filters_parking,
+                                              filters_proximity_lightrail,
+                                              filters_brownfield,
+                                              filters_contaminated))
   )
-
 
   return(filter_plan)
 }

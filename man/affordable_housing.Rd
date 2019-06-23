@@ -3,17 +3,20 @@
 \name{make_affordable_housing_properties}
 \alias{make_affordable_housing_properties}
 \alias{view_affordable_housing_properties}
-\title{Affordable Housing Properties (King County)}
+\alias{make_affordable_housing_subsidies}
+\title{Affordable Housing Properties & Subsidies (King County)}
 \usage{
 make_affordable_housing_properties(path)
 
 view_affordable_housing_properties()
+
+make_affordable_housing_subsidies(path, zcta)
 }
 \value{
 Returns an \code{\link[sf:sf]{sf object}}.
 }
 \description{
-Affordable housing properties within King County, Washington.
+Affordable housing properties and subsidies within King County, Washington.
 }
 \note{
 \itemize{
@@ -23,4 +26,3 @@ Affordable housing properties within King County, Washington.
 \item{User-applied filters: State = "WA", County = "King"}
 }
 }
-\keyword{internal}

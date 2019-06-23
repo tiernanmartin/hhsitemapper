@@ -230,3 +230,9 @@ lesser_of <- function(x,y){
   dplyr::if_else(x<= y, x,y, missing = x)
 
 }
+
+#' @keywords internal
+empty_as_na <- function(x){
+  if("factor" %in% class(x)) x <- as.character(x) ## since ifelse wont work with factors
+  ifelse(as.character(x)!="", x, NA_character_)
+}
