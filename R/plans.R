@@ -25,7 +25,8 @@ get_workflow_plan <- function(){
     get_utilization_criteria_plan(),
     get_utilization_plan(),
     get_official_names_plan(),
-    get_filter_plan()
+    get_filter_plan(),
+    get_helper_plan()
   )
 
   return(workflow_plan)
@@ -416,6 +417,12 @@ get_data_source_plan <- function(){
                                                    file_id = "4gxr9",
                                                    path = file_in("extdata/source/Designated_QOZs_12-14-18.xlsx"),
                                                    osf_dirpath = "data/raw-data"),
+                              trigger = trigger(mode = "blacklist", condition = FALSE)),
+    opp360_xwalk_upload_status = target(osf_upload_or_update(has_osf_access = has_osf_access,
+                                                   project_id = "pvu6f",
+                                                   file_id = "ucr95",
+                                                   path = file_in("extdata/source/PolicyMap_FIPS_URL_Crosswalk.xlsx"),
+                                                   osf_dirpath = "data/raw-data"),
                               trigger = trigger(mode = "blacklist", condition = FALSE))
 
   )
@@ -542,7 +549,9 @@ get_data_cache_plan <- function(){
     qct_filepath = target(command = osf_download_file(osf_id = "az49w", path = file_out("extdata/osf/QCT2019dbf.zip")),
                           trigger = trigger(change = osf_get_file_version(osf_id = "az49w"))),
     oz_filepath = target(command = osf_download_file(osf_id = "4gxr9", path = file_out("extdata/osf/Designated_QOZs_12-14-18.xlsx")),
-                         trigger = trigger(change = osf_get_file_version(osf_id = "4gxr9")))
+                         trigger = trigger(change = osf_get_file_version(osf_id = "4gxr9"))),
+    opp360_xwalk_filepath = target(command = osf_download_file(osf_id = "ucr95", path = file_out("extdata/osf/PolicyMap_FIPS_URL_Crosswalk.xlsx")),
+                         trigger = trigger(change = osf_get_file_version(osf_id = "ucr95")))
   )
 
   ready_plan <- drake::drake_plan(
@@ -613,7 +622,8 @@ get_data_cache_plan <- function(){
     nmtc = make_nmtc(path = file_in("extdata/osf/NMTC-2011-2015-LIC-Nov2-2017-4pm.xlsx")),
     dda = make_dda(path = file_in("extdata/osf/DDA2019M.PDF")),
     qct = make_qct(path = file_in("extdata/osf/QCT2019dbf.zip")),
-    oz = make_oz(path = file_in("extdata/osf/Designated_QOZs_12-14-18.xlsx"))
+    oz = make_oz(path = file_in("extdata/osf/Designated_QOZs_12-14-18.xlsx")),
+    opp360_xwalk = make_opp360_xwalk(path = file_in("extdata/osf/PolicyMap_FIPS_URL_Crosswalk.xlsx"))
   )
 
   data_cache_plan <- drake::bind_plans(download_plan, ready_plan)
@@ -803,7 +813,7 @@ get_owner_plan <- function(){
   return(owner_plan)
 }
 
-get_filter_plan <- function(parcel_sf_ready, census_tracts){
+get_filter_plan <- function(){
 
   options(drake_make_menu = FALSE)
 
@@ -864,6 +874,21 @@ get_filter_plan <- function(parcel_sf_ready, census_tracts){
   )
 
   return(filter_plan)
+}
+
+get_helper_plan <- function(){
+
+  options(drake_make_menu = FALSE)
+
+  helper_plan <- drake::drake_plan(
+    helpers_url_parcel_viewer = make_helpers_url_parcel_viewer(parcel_df_ready),
+    helpers_url_opp360 = make_helpers_url_opp360(filters_census_tract, opp360_xwalk),
+    helpers_url_contaminated = make_helpers_url_contaminated(filters_contaminated, contaminated_sites),
+    helpers = make_helpers(parcel_ready,
+                           helper_list = list(helpers_url_parcel_viewer,helpers_url_opp360,helpers_url_contaminated))
+  )
+
+  return(helper_plan)
 }
 
 # INVENTORY PLAN ----------------------------------------------------------
