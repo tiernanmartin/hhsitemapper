@@ -13,3 +13,4 @@ tmp/*
 inst/extdata/**/[a-z]*.*
 inst/extdata/**/[0-9]*.*
 .httr-oauth
+.drake_history
