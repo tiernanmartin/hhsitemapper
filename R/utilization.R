@@ -5,14 +5,15 @@
 
 #' @rdname utilization
 #' @export
-make_utilization <- function(suitability, utilization_present, utilization_potential, seattle_utilization_ratio){
+make_utilization <- function(suitability, utilization_criteria, utilization_list = list()){
 
-  util_join <- suitability %>%
+  suit_pin_only <- suitability %>%
     sf::st_drop_geometry() %>%
-    dplyr::select(PIN) %>%
-    dplyr::left_join(utilization_present, by = "PIN") %>%
-    dplyr::left_join(utilization_potential, by = "PIN") %>%
-    dplyr::left_join(seattle_utilization_ratio, by = "PIN")
+    dplyr::select(PIN)
+
+  util_join <-  list(suit_pin_only) %>%
+    append(utilization_list) %>%
+    purrr::reduce(dplyr::left_join, by = "PIN")
 
   util_ready <-  util_join %>%
     dplyr::mutate(SEATTLE_UTIL_RATIO_DBL_TRIM = dplyr::if_else(SEATTLE_UTIL_RATIO_DBL > 5, 5, SEATTLE_UTIL_RATIO_DBL),

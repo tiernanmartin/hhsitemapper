@@ -236,3 +236,34 @@ empty_as_na <- function(x){
   if("factor" %in% class(x)) x <- as.character(x) ## since ifelse wont work with factors
   ifelse(as.character(x)!="", x, NA_character_)
 }
+
+#' @keywords internal
+safe_divide <- function(x,y){
+
+  x <- dplyr::if_else(is.na(x),0,x,0)
+
+  dividend <- x/y
+
+  result <- dplyr::if_else(dividend %in% c(Inf,NaN), 0, dividend)
+
+  return(result)
+
+}
+
+#' @keywords internal
+zip_pithy <- function(zipfile, files, recurse = TRUE, compression_level = 9){
+
+        if(!dir.exists(dirname(zipfile))){stop("The zipfile filepath is invalid (it doesn't exist).")}
+
+        old_wd <- getwd()
+
+        setwd(dirname(zipfile))
+
+        zip_fp <- basename(zipfile)
+
+        files_fp <- purrr::map_chr(files, basename)
+
+        zip::zip(zipfile = zip_fp, files = files_fp, recurse = recurse, compression_level = compression_level)
+
+        setwd(old_wd)
+}
