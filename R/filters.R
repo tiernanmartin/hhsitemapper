@@ -106,6 +106,8 @@ make_filters_place_name <- function(parcel_df_ready, filters_place){
     purrr::discard(is.na) %>%
     unique()
 
+
+
   filters_place_name <- parcel_df_ready %>%
     dplyr::select(PIN, DISTRICT_NAME) %>%
     dplyr::left_join(filters_place, by = "PIN") %>%
@@ -118,7 +120,9 @@ make_filters_place_name <- function(parcel_df_ready, filters_place){
                 DISTRICT_NAME %in% districts ~ DISTRICT_NAME,
                 is.na(DISTRICT_NAME) & !is.na(FILTER_PLACE) ~ FILTER_PLACE,
                 TRUE ~ "OTHER"
-              ))
+              )) %>%
+    dplyr::mutate(FILTER_PLACE_NAME = snakecase::to_title_case(FILTER_PLACE_NAME, sep_in = NULL),
+                  FILTER_PLACE_NAME = stringr::str_replace(FILTER_PLACE_NAME, "Kc", "KC "))
 
 
   return(filters_place_name)
@@ -141,12 +145,22 @@ make_filters_owner_category <- function(owner_category){
 #' @export
 make_filters_public_owner <- function(owner_category){
 
-  filters_public_owner <- owner_category %>%
-    dplyr::transmute(PIN,
-              FILTER_PUBLIC_OWNER = dplyr::case_when(
-                OWNER_PUBLIC_LGL ~ OWNER_NAME_ORG,
-                TRUE ~ NA_character_
-              ))
+  fix_pubowner_string <- function(x){
+
+    title_case <- snakecase::to_title_case(x)
+
+    fix_number <- stringr::str_replace(title_case, "(No\\.)(?=[:digit:])", "No\\. ")
+
+    add_leading_space <- stringr::str_replace(fix_number, "\\(", " \\(")
+
+    return(add_leading_space)
+
+  }
+
+  filters_public_owner <-
+    owner_category %>%
+      dplyr::transmute(PIN,
+                       FILTER_PUBLIC_OWNER = dplyr::if_else(OWNER_PUBLIC_LGL, fix_pubowner_string(OWNER_NAME_ORG), NA_character_))
 
   return(filters_public_owner)
 
