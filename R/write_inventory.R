@@ -24,7 +24,7 @@ write_inventory_csv <- function(x, path){
     sf::st_drop_geometry() %>%
     dplyr::select_if(not_sfc)
 
-  readr::write_csv(inventory_table, path)
+  readr::write_csv(inventory_table, path, na = "")
 
 }
 
